@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import csv
 import json
-import statistics
 from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -23,7 +22,9 @@ SITE = ROOT / "site"
 HIST = DATA / "floor_history.csv"
 TEMPLATE = ROOT / "dashboard_template.html"
 PARIS = ZoneInfo("Europe/Paris")
-FILTERS = ("all", "hi", "sub100", "sub1k")
+TIER_KEYS = ("all", "hi", "Legendary", "Epic", "Rare", "Uncommon", "Common")
+SUB_KEYS = ("all", "sub10", "sub100", "sub1k", "sub10k")
+RANK_KEYS = ("all", "10", "50", "100", "500", "1000")
 HIST_COLS = [
     "ts_utc",
     "ts_paris",
@@ -33,15 +34,56 @@ HIST_COLS = [
     "floor_sub1k",
     "listed_live",
     "btc_usd",
+    "floors_json",
 ]
+LEGACY_FLOOR_KEYS = {
+    "floor_all": "all|all|all",
+    "floor_hi": "hi|all|all",
+    "floor_sub100": "all|sub100|all",
+    "floor_sub1k": "all|sub1k|all",
+}
 
 
-def in_filter(f: str, tier: str, sub: str) -> bool:
-    if f == "all":
-        return True
-    if f == "hi":
-        return tier in ("Legendary", "Epic")
-    return sub == f
+def floor_key(tier: str, sub: str, rank: str) -> str:
+    return f"{tier}|{sub}|{rank}"
+
+
+def match_slice(tier: str, sub: str, rank: int | None, ft: str, fs: str, fr: str) -> bool:
+    if ft == "hi":
+        if tier not in ("Legendary", "Epic"):
+            return False
+    elif ft != "all" and tier != ft:
+        return False
+    if fs != "all" and sub != fs:
+        return False
+    if fr != "all":
+        if rank is None or rank > int(fr):
+            return False
+    return True
+
+
+def slice_floors(live: list[dict]) -> dict[str, int]:
+    """Lowest ask for every rareté × numéro × rang combination that has a listing."""
+    best: dict[str, int] = {}
+    for item in live:
+        tier, sub, rank, ask = item["tier"], item["sub"], item["rank"], item["ask"]
+        for ft in TIER_KEYS:
+            if ft == "hi":
+                if tier not in ("Legendary", "Epic"):
+                    continue
+            elif ft != "all" and tier != ft:
+                continue
+            for fs in SUB_KEYS:
+                if fs != "all" and sub != fs:
+                    continue
+                for fr in RANK_KEYS:
+                    if fr != "all" and (rank is None or rank > int(fr)):
+                        continue
+                    k = floor_key(ft, fs, fr)
+                    cur = best.get(k)
+                    if cur is None or ask < cur:
+                        best[k] = ask
+    return best
 
 
 def parse_utc(s: str) -> datetime:
@@ -99,43 +141,52 @@ def main() -> int:
             "rank": rf.get("rarityRank"),
             "num": n,
         })
-    floors = {}
-    listed_n = {}
-    for f in FILTERS:
-        asks = sorted(x["ask"] for x in live if in_filter(f, x["tier"], x["sub"]))
-        floors[f] = asks[0] if asks else None
-        listed_n[f] = len(asks)
+    floors = slice_floors(live)
+    listed_all = sum(1 for x in live if match_slice(x["tier"], x["sub"], x["rank"], "all", "all", "all"))
 
     DATA.mkdir(parents=True, exist_ok=True)
-    new = not HIST.exists()
-    with HIST.open("a", newline="") as fh:
-        w = csv.writer(fh, lineterminator="\n")
-        if new:
-            w.writerow(HIST_COLS)
-        w.writerow([
-            now.isoformat(timespec="seconds"),
-            pfmt(now),
-            floors["all"] or "",
-            floors["hi"] or "",
-            floors["sub100"] or "",
-            floors["sub1k"] or "",
-            listed_n["all"],
-            usd or "",
-        ])
+    previous: list[dict] = []
+    if HIST.exists():
+        with HIST.open(newline="") as fh:
+            previous = list(csv.DictReader(fh))
+    previous.append({
+        "ts_utc": now.isoformat(timespec="seconds"),
+        "ts_paris": pfmt(now),
+        "floor_all": floors.get("all|all|all") or "",
+        "floor_hi": floors.get("hi|all|all") or "",
+        "floor_sub100": floors.get("all|sub100|all") or "",
+        "floor_sub1k": floors.get("all|sub1k|all") or "",
+        "listed_live": listed_all,
+        "btc_usd": usd or "",
+        "floors_json": json.dumps(floors, separators=(",", ":")),
+    })
+    with HIST.open("w", newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=HIST_COLS, lineterminator="\n", extrasaction="ignore")
+        writer.writeheader()
+        for record in previous:
+            writer.writerow({col: record.get(col, "") for col in HIST_COLS})
+
     hist = []
-    with HIST.open(newline="") as fh:
-        for r in csv.DictReader(fh):
+    for record in previous:
+        try:
+            dt = parse_utc(record["ts_utc"])
+        except Exception:
+            continue
+        merged_floors: dict[str, int] = {}
+        for col, key in LEGACY_FLOOR_KEYS.items():
+            v = record.get(col)
+            if v not in (None, ""):
+                merged_floors[key] = int(v)
+        raw = record.get("floors_json") or ""
+        if raw:
             try:
-                dt = parse_utc(r["ts_utc"])
-            except Exception:
-                continue
-            row = {"t": pfmt(dt), "ts": dt.timestamp()}
-            for f in FILTERS:
-                v = r.get(f"floor_{f}")
-                row[f] = int(v) if v not in (None, "") else None
-            hist.append(row)
+                for k, v in json.loads(raw).items():
+                    if v not in (None, ""):
+                        merged_floors[k] = int(v)
+            except (json.JSONDecodeError, TypeError, ValueError):
+                pass
+        hist.append({"t": pfmt(dt), "ts": dt.timestamp(), "floors": merged_floors})
     hist.sort(key=lambda r: r["ts"])
-    first_real_ts = hist[0]["ts"] if hist else now.timestamp()
 
     rows = []
     for t in trades:
@@ -162,42 +213,25 @@ def main() -> int:
         })
     rows.sort(key=lambda r: r["ts"])
 
-    # Before the first recorded live floor: hourly lowest sale, dust excluded.
-    approx = {}
-    for f in FILTERS:
-        per = {}
-        for r in rows:
-            if r["ts"] >= first_real_ts or r["p"] < ASK_MIN or not in_filter(f, r["tier"], r["sub"]):
-                continue
-            per[r["h1"]] = min(per.get(r["h1"], 10**18), r["p"])
-        approx[f] = [{"t": k, "v": v} for k, v in sorted(per.items())]
-
-    t24, t48 = now.timestamp() - 86400, now.timestamp() - 2 * 86400
-    stats = {}
-    for f in FILTERS:
-        sel = [r for r in rows if in_filter(f, r["tier"], r["sub"])]
-        d1 = [r["p"] for r in sel if r["ts"] >= t24]
-        d0 = [r["p"] for r in sel if t48 <= r["ts"] < t24]
-        m1 = statistics.median(d1) if d1 else None
-        m0 = statistics.median(d0) if d0 else None
-        stats[f] = {
-            "floor": floors[f],
-            "listed": listed_n[f],
-            "vol24": sum(d1),
-            "n24": len(d1),
-            "med24": m1,
-            "medPrev": m0,
-            "chg": (m1 / m0 - 1) if (m1 and m0) else None,
-        }
+    # One point per filter only when its floor changes, so the page stays small
+    # while data/floor_history.csv keeps every snapshot.
+    series: dict[str, list] = {}
+    prev: dict[str, int | None] = {}
+    for row in hist:
+        cur = row["floors"]
+        for k in set(prev) | set(cur):
+            v = cur.get(k)
+            if prev.get(k) != v:
+                series.setdefault(k, []).append({"t": row["t"], "ts": row["ts"], "v": v})
+                prev[k] = v
 
     data = {
         "generatedUtc": now.isoformat(timespec="seconds"),
         "generatedParis": pfmt(now),
         "btcUsd": usd,
         "trades": rows,
-        "floorHist": hist,
-        "floorApprox": approx,
-        "stats": stats,
+        "live": [{"ask": x["ask"], "tier": x["tier"], "sub": x["sub"], "rank": x["rank"]} for x in live],
+        "floorSeries": series,
         "supply": len(inscriptions),
         "range": [rows[0]["t"], rows[-1]["t"]] if rows else None,
     }
@@ -213,12 +247,12 @@ def main() -> int:
         "ok": True,
         "trades": len(rows),
         "range": data["range"],
-        "floor": floors["all"],
-        "floorBtc": btc(floors["all"]) if floors["all"] else None,
-        "listed": listed_n["all"],
+        "floor": floors.get("all|all|all"),
+        "floorBtc": btc(floors["all|all|all"]) if floors.get("all|all|all") else None,
+        "listed": listed_all,
         "btcUsd": usd,
         "histRows": len(hist),
-        "approxHours": len(approx["all"]),
+        "floorKeys": len(floors),
         "supply": len(inscriptions),
         "index": str(out),
         "bytes": out.stat().st_size,

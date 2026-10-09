@@ -16,7 +16,18 @@ header{padding:12px 16px 4px}h1{font-size:18px;margin:0 0 4px}
 .ctl{display:flex;flex-wrap:wrap;gap:6px;padding:4px 16px;align-items:center}
 .ctl button{background:#21262d;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:6px 10px;cursor:pointer;font:inherit}
 .ctl button.on{background:#1f6feb;border-color:#1f6feb}.ctl .lbl{color:#8b949e;font-size:12px;margin-left:6px}
+.fpband{display:inline-flex;flex-wrap:wrap;gap:8px;align-items:center;color:#8b949e;font-size:12px}
+.fpband input{width:4.2em;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:4px 6px;font:inherit}
+.tfbox{position:relative}
+.pop{position:absolute;top:calc(100% + 4px);left:0;z-index:20;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:8px;min-width:200px;box-shadow:0 8px 24px #000a}
+.pop[hidden]{display:none}
+.prow{display:flex;gap:4px;align-items:center}
+.prow [data-tf]{flex:1;text-align:left}
+.prow .star{min-width:36px;color:#8b949e}
+.prow .star.on{color:#d29922;background:#3d2e00;border-color:#d29922}
+.phint{color:#8b949e;font-size:11px;padding:6px 2px 0;line-height:1.4}
 #chart{height:860px;width:100%}
+.hint{color:#8b949e;font-size:11px;flex-basis:100%;line-height:1.4}
 .note{color:#8b949e;font-size:11px;padding:4px 16px 16px;line-height:1.5}
 @media (max-width:720px){
   header{padding:10px 10px 4px}h1{font-size:16px}
@@ -31,42 +42,167 @@ header{padding:12px 16px 4px}h1{font-size:18px;margin:0 0 4px}
 <header><h1>🔒 Shielded Nakas — Prix · Volume · RSI</h1>
 <div class="sub" id="meta"></div></header>
 <div class="stats" id="stats"></div>
-<div class="ctl"><span class="lbl">Filtre</span>
-<button data-f="all" class="on">Tous</button><button data-f="hi">Legendary+Epic</button>
-<button data-f="sub100">sub100</button><button data-f="sub1k">sub1k</button>
-<span class="lbl">Intervalle</span>
-<button data-tf="h1" class="on">1h</button><button data-tf="h4">4h</button><button data-tf="d1">1j</button>
-<span class="lbl">Échelle</span><button id="log">Log</button></div>
+<div class="ctl"><span class="lbl">Rareté</span>
+<button type="button" data-tier="all" class="on">Tous</button>
+<button type="button" data-tier="hi" title="Legendary et Epic">Leg+Epic</button>
+<button type="button" data-tier="Legendary">Legendary</button>
+<button type="button" data-tier="Epic">Epic</button>
+<button type="button" data-tier="Rare">Rare</button>
+<button type="button" data-tier="Uncommon">Uncommon</button>
+<button type="button" data-tier="Common">Common</button>
+<span class="lbl">Ventes</span>
+<button type="button" data-mode="all" class="on">Toutes</button>
+<button type="button" data-mode="fp" title="Retire les petites et les grosses ventes">FP de base</button>
+<span id="fpband" class="fpband" hidden>
+<label>petites &lt; <input id="fplo" type="number" min="0.1" max="1" step="0.1" value="0.6" aria-label="Seuil des petites ventes">×</label>
+<label>grosses &gt; <input id="fphi" type="number" min="1" max="10" step="0.1" value="1.8" aria-label="Seuil des grosses ventes">×</label>
+</span>
+<span class="lbl">Échelle</span><button type="button" id="log">Log</button></div>
+<div class="ctl"><span class="lbl">N°</span>
+<button type="button" data-sub="all" class="on" title="Tous les numéros">Tous</button>
+<button type="button" data-sub="sub10" title="Shielded # 1 à 9">sub10</button>
+<button type="button" data-sub="sub100" title="Shielded # 10 à 99">sub100</button>
+<button type="button" data-sub="sub1k" title="Shielded # 100 à 999">sub1k</button>
+<button type="button" data-sub="sub10k" title="Shielded # 1000 et plus">sub10k</button>
+<span class="lbl">Rang</span>
+<button type="button" data-rank="all" class="on" title="Tous les rangs">Tous</button>
+<button type="button" data-rank="10" title="Rareté ≤ 10">Top 10</button>
+<button type="button" data-rank="50" title="Rareté ≤ 50">Top 50</button>
+<button type="button" data-rank="100" title="Rareté ≤ 100">Top 100</button>
+<button type="button" data-rank="500" title="Rareté ≤ 500">Top 500</button>
+<button type="button" data-rank="1000" title="Rareté ≤ 1000">Top 1000</button>
+<span class="hint">Les trois lignes se combinent. sub10 = #1–9, sub100 = #10–99, sub1k = #100–999, sub10k = #1000+. Top = rang de rareté.</span></div>
+<div class="ctl"><span class="lbl">Temps</span>
+<span id="tffavs"></span>
+<span id="tfbox" class="tfbox">
+<button type="button" id="tfmenu" title="Toutes les unités, de 1 minute à 1 mois" aria-expanded="false">▾</button>
+<div id="tfpop" class="pop" hidden></div>
+</span></div>
 <div id="chart"></div>
 <div class="note" id="note"></div>
 <script>
 const D=__DATA__;const USD=D.btcUsd;const S=1e8;
-let F="all",TF="h1",LOG=false;
+const ORDER=["1m","5m","15m","30m","1H","4H","1D","1W","1M"];
+const TFTITLE={ "1m":"1 minute","5m":"5 minutes","15m":"15 minutes","30m":"30 minutes","1H":"1 heure","4H":"4 heures","1D":"1 jour","1W":"1 semaine","1M":"1 mois" };
+const LS="nakas-dash-v2";
+let TIER="all",SUB="all",RANK="all",TF="1H",LOG=false,MODE="all",FAVS=["15m","1H","4H","1D"],FLO=0.6,FHI=1.8;
 const fb=s=>s==null?"—":(s/S).toFixed(8).replace(/0+$/,"").replace(/\.$/,"")+" BTC";
 const fu=s=>(s==null||!USD)?"":"~$"+Math.round(s/S*USD).toLocaleString("en-US");
 const both=s=>s==null?"—":fb(s)+(USD?" ("+fu(s)+")":"");
-const FN={all:"Tous",hi:"Legendary+Epic",sub100:"sub100",sub1k:"sub1k"};
-const inF=(f,r)=>f==="all"||(f==="hi"?(r.tier==="Legendary"||r.tier==="Epic"):r.sub===f);
+const TN={all:"Tous",hi:"Leg+Epic",Legendary:"Legendary",Epic:"Epic",Rare:"Rare",Uncommon:"Uncommon",Common:"Common"};
+function matchRow(r){
+ if(TIER==="hi"){if(r.tier!=="Legendary"&&r.tier!=="Epic")return false}
+ else if(TIER!=="all"&&r.tier!==TIER)return false;
+ if(SUB!=="all"&&r.sub!==SUB)return false;
+ if(RANK!=="all"&&(r.rank==null||r.rank>+RANK))return false;
+ return true;
+}
+function filterLabel(){
+ const p=[];
+ if(TIER!=="all")p.push(TN[TIER]||TIER);
+ if(SUB!=="all")p.push(SUB);
+ if(RANK!=="all")p.push("top "+RANK);
+ return p.length?p.join(" · "):"Tous";
+}
+function filterKey(){return TIER+"|"+SUB+"|"+RANK}
+function liveFloor(){
+ const asks=(D.live||[]).filter(matchRow).map(r=>r.ask).sort((a,b)=>a-b);
+ return {floor:asks.length?asks[0]:null,listed:asks.length};
+}
 const med=a=>{const b=[...a].sort((x,y)=>x-y),m=b.length>>1;return b.length%2?b[m]:(b[m-1]+b[m])/2};
 function rsi(c,n=14){const o=Array(c.length).fill(null);if(c.length<=n)return o;let g=0,l=0;
  for(let i=1;i<=n;i++){const d=c[i]-c[i-1];d>0?g+=d:l-=d}g/=n;l/=n;
  o[n]=l===0?100:100-100/(1+g/l);
  for(let i=n+1;i<c.length;i++){const d=c[i]-c[i-1];g=(g*(n-1)+Math.max(d,0))/n;l=(l*(n-1)+Math.max(-d,0))/n;o[i]=l===0?100:100-100/(1+g/l)}return o}
-function renderStats(){const s=D.stats[F];const c=s.chg;
- const cards=[["Floor actuel ("+FN[F]+")",fb(s.floor),fu(s.floor)],
- ["Volume 24h",fb(s.vol24),fu(s.vol24)],["Ventes 24h",s.n24,""],
- ["Médiane 24h",fb(s.med24),c==null?"pas de base J-1":`<span class="${c>=0?"up":"down"}">${c>=0?"+":""}${(c*100).toFixed(1)}%</span> vs 24h précédentes`],
- ["Listés (live)",s.listed,F==="all"?"sur "+D.supply:""]];
+function pad(n){return String(n).padStart(2,"0")}
+function parisParts(ms){
+ const o={};
+ for(const p of new Intl.DateTimeFormat("en-US",{timeZone:"Europe/Paris",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",weekday:"short",hourCycle:"h23"}).formatToParts(new Date(ms)))
+  if(p.type!=="literal")o[p.type]=p.value;
+ let H=+o.hour; if(H===24)H=0;
+ return {y:+o.year,m:+o.month,d:+o.day,H,M:+o.minute,wd:o.weekday};
+}
+function addDays(y,m,d,n){const dt=new Date(Date.UTC(y,m-1,d+n));return [dt.getUTCFullYear(),dt.getUTCMonth()+1,dt.getUTCDate()]}
+function stamp(y,m,d,H,M){return `${y}-${pad(m)}-${pad(d)} ${pad(H)}:${pad(M)}`}
+function bucket(ts,tf){
+ const p=parisParts(ts*1000);
+ if(tf==="1M")return stamp(p.y,p.m,1,0,0);
+ if(tf==="1W"){const map={Mon:0,Tue:1,Wed:2,Thu:3,Fri:4,Sat:5,Sun:6};const [y,m,d]=addDays(p.y,p.m,p.d,-(map[p.wd]||0));return stamp(y,m,d,0,0)}
+ if(tf==="1D")return stamp(p.y,p.m,p.d,0,0);
+ let H=p.H,M=p.M;
+ if(tf==="4H"){H=Math.floor(H/4)*4;M=0}
+ else if(tf==="1H")M=0;
+ else if(tf==="30m")M=Math.floor(M/30)*30;
+ else if(tf==="15m")M=Math.floor(M/15)*15;
+ else if(tf==="5m")M=Math.floor(M/5)*5;
+ return stamp(p.y,p.m,p.d,H,M);
+}
+function localMedians(rows){
+ const w=6*3600,n=rows.length,out=new Array(n);let lo=0,hi=0;
+ for(let i=0;i<n;i++){
+  while(hi<n && rows[hi].ts<=rows[i].ts+w)hi++;
+  while(lo<i && rows[lo].ts<rows[i].ts-w)lo++;
+  out[i]=med(rows.slice(lo,hi).map(r=>r.p));
+ }
+ return out;
+}
+function loadPrefs(){
+ try{
+  const p=JSON.parse(localStorage.getItem(LS)||"{}");
+  if(ORDER.includes(p.tf))TF=p.tf;
+  if(Array.isArray(p.favs)&&p.favs.length&&p.favs.every(x=>ORDER.includes(x)))FAVS=p.favs.slice();
+  if(["all","hi","Legendary","Epic","Rare","Uncommon","Common"].includes(p.tier))TIER=p.tier;
+  if(["all","sub10","sub100","sub1k","sub10k"].includes(p.sub))SUB=p.sub;
+  if(["all","10","50","100","500","1000"].includes(String(p.rank)))RANK=String(p.rank);
+  if(typeof p.log==="boolean")LOG=p.log;
+  if(p.mode==="all"||p.mode==="fp")MODE=p.mode;
+  if(Number.isFinite(+p.lo)&&+p.lo>=0.1&&+p.lo<=1)FLO=+p.lo;
+  if(Number.isFinite(+p.hi)&&+p.hi>=1&&+p.hi<=10)FHI=+p.hi;
+ }catch(e){}
+}
+function savePrefs(){try{localStorage.setItem(LS,JSON.stringify({tf:TF,favs:FAVS,tier:TIER,sub:SUB,rank:RANK,log:LOG,mode:MODE,lo:FLO,hi:FHI}))}catch(e){}}
+function renderTfBar(){
+ const favs=ORDER.filter(id=>FAVS.includes(id));
+ const shown=favs.includes(TF)?favs:[...favs,TF];
+ document.getElementById("tffavs").innerHTML=shown.map(id=>`<button type="button" data-tf="${id}" class="${id===TF?"on":""}" title="${TFTITLE[id]}">${id}</button>`).join("");
+ document.getElementById("tfpop").innerHTML=ORDER.map(id=>{
+  const on=FAVS.includes(id);
+  return `<div class="prow"><button type="button" data-tf="${id}" class="${id===TF?"on":""}" title="${TFTITLE[id]}">${id} · ${TFTITLE[id]}</button><button type="button" class="star${on?" on":""}" data-star="${id}" title="${on?"Retirer des favoris":"Ajouter aux favoris"}">${on?"★":"☆"}</button></div>`;
+ }).join("")+`<div class="phint">L’étoile garde l’unité dans la barre, sur ce navigateur.</div>`;
+}
+function selectedTrades(){
+ const rows=D.trades.filter(matchRow).slice().sort((a,b)=>a.ts-b.ts);
+ if(MODE!=="fp")return {rows,info:null};
+ const lm=localMedians(rows),kept=[];
+ for(let i=0;i<rows.length;i++){const ratio=lm[i]?rows[i].p/lm[i]:1;if(ratio>=FLO&&ratio<=FHI)kept.push(rows[i])}
+ return {rows:kept,info:{kept:kept.length,total:rows.length}};
+}
+function renderStats(rows){
+ const live=liveFloor();const now=Date.parse(D.generatedUtc)/1000;
+ const d1=rows.filter(r=>r.ts>=now-86400).map(r=>r.p);
+ const d0=rows.filter(r=>r.ts>=now-172800&&r.ts<now-86400).map(r=>r.p);
+ const m1=d1.length?med(d1):null,m0=d0.length?med(d0):null,c=(m1&&m0)?m1/m0-1:null;
+ const tag=MODE==="fp"?" · FP de base":"";
+ const cards=[["Floor actuel ("+filterLabel()+")",fb(live.floor),fu(live.floor)],
+ ["Volume 24h"+tag,fb(d1.reduce((a,b)=>a+b,0)),fu(d1.reduce((a,b)=>a+b,0))],["Ventes 24h"+tag,d1.length,""],
+ ["Médiane 24h"+tag,fb(m1),c==null?"pas de base J-1":`<span class="${c>=0?"up":"down"}">${c>=0?"+":""}${(c*100).toFixed(1)}%</span> vs 24h précédentes`],
+ ["Listés (live)",live.listed,TIER==="all"&&SUB==="all"&&RANK==="all"?"sur "+D.supply:""]];
  document.getElementById("stats").innerHTML=cards.map(([k,v,u])=>`<div class="card"><div class="k">${k}</div><div class="v">${v}</div><div class="u">${u}</div></div>`).join("")}
-function render(){renderStats();
- const tr=D.trades.filter(r=>inF(F,r));const g=new Map();
- for(const r of tr){const k=r[TF];if(!g.has(k))g.set(k,[]);g.get(k).push(r)}
+function render(){
+ const sel=selectedTrades();const tr=sel.rows;renderStats(tr);const g=new Map();
+ for(const r of tr){const k=bucket(r.ts,TF);if(!g.has(k))g.set(k,[]);g.get(k).push(r)}
  const ks=[...g.keys()].sort();const O=[],H=[],L=[],C=[],M=[],V=[],N=[],T=[];
  for(const k of ks){const a=g.get(k),p=a.map(r=>r.p);O.push(a[0].p);C.push(a[a.length-1].p);
   H.push(Math.max(...p));L.push(Math.min(...p));const m=med(p);M.push(m);const v=p.reduce((x,y)=>x+y,0);V.push(v);N.push(a.length);
   T.push(`${k}<br>O ${both(a[0].p)}<br>H ${both(Math.max(...p))}<br>L ${both(Math.min(...p))}<br>C ${both(a[a.length-1].p)}<br>Médiane ${both(m)}<br>${a.length} ventes`)}
  const R=rsi(M);const btc=a=>a.map(x=>x==null?null:x/S);
- const fh=D.floorHist.filter(r=>r[F]!=null),fa=D.floorApprox[F]||[];
+ const fhAll=((D.floorSeries||{})[filterKey()]||[]),fhPts=fhAll.filter(p=>p.v!=null);
+ const cut=fhPts.length?fhPts[0].ts:Infinity,per={};
+ for(const r of tr){if(r.ts>=cut||r.p<5000)continue;const k=bucket(r.ts,"1H");per[k]=Math.min(per[k]??1e18,r.p)}
+ const fa=Object.keys(per).sort().map(k=>({t:k,v:per[k]}));
+ const fpNote=sel.info
+  ? `<b>FP de base</b> : petites ventes (&lt; ${FLO}×) et grosses (&gt; ${FHI}×) retirées par rapport à la médiane locale (±6 h). ${sel.info.kept} ventes gardées sur ${sel.info.total}.`
+  : `<b>FP de base</b> enlève les petites et les grosses ventes pour ne garder que celles proches du floor du moment.`;
  const narrow=window.innerWidth<720;
  const nm=narrow
   ? ["OHLC","Médiane","Floor ≈ approx.","Floor live","Volume","Ventes","RSI(14)"]
@@ -78,8 +214,8 @@ function render(){renderStats();
   text:M.map(both),hovertemplate:"%{x}<br>Médiane %{text}<extra></extra>"},
  {type:"scatter",mode:"lines",x:fa.map(r=>r.t),y:fa.map(r=>r.v/S),name:nm[2],line:{color:"#a371f7",width:1.5,dash:"dot"},
   yaxis:"y",text:fa.map(r=>both(r.v)),hovertemplate:"%{x}<br>Floor approx. (min vente) %{text}<extra></extra>"},
- {type:"scatter",mode:"lines+markers",x:fh.map(r=>r.t),y:fh.map(r=>r[F]/S),name:nm[3],line:{color:"#58a6ff",width:2,shape:"hv"},marker:{size:4},
-  yaxis:"y",text:fh.map(r=>both(r[F])),hovertemplate:"%{x}<br>Floor live %{text}<extra></extra>"},
+ {type:"scatter",mode:"lines+markers",x:fhAll.map(r=>r.t),y:fhAll.map(r=>r.v==null?null:r.v/S),name:nm[3],line:{color:"#58a6ff",width:2,shape:"hv"},marker:{size:4},
+  yaxis:"y",text:fhAll.map(r=>both(r.v)),hovertemplate:"%{x}<br>Floor live %{text}<extra></extra>"},
  {type:"bar",x:ks,y:btc(V),name:nm[4],marker:{color:"#1f6feb"},yaxis:"y2",text:V.map(both),textposition:"none",hovertemplate:"%{x}<br>Volume %{text}<extra></extra>"},
  {type:"scatter",mode:"lines",x:ks,y:N,name:nm[5],line:{color:"#e6edf3",width:1},yaxis:"y3",hovertemplate:"%{x}<br>%{y} ventes<extra></extra>"},
  {type:"scatter",mode:"lines",x:ks,y:R,name:nm[6],line:{color:"#f778ba",width:1.5},yaxis:"y4",connectgaps:true,hovertemplate:"%{x}<br>RSI %{y:.1f}<extra></extra>"}];
@@ -95,12 +231,44 @@ function render(){renderStats();
   yaxis3:{...ax,domain:[0.22,0.42],overlaying:"y2",side:"right",title:{text:"Ventes"},showgrid:false},
   yaxis4:{...ax,domain:[0,0.18],range:[0,100],title:{text:"RSI 14"},tickvals:[30,50,70]},
   shapes:[30,70].map(v=>({type:"line",xref:"paper",x0:0,x1:1,yref:"y4",y0:v,y1:v,line:{color:v===70?"#f85149":"#3fb950",dash:"dash",width:1}}))};
- Plotly.react("chart",tr0,lay,{responsive:true,displaylogo:false,scrollZoom:!narrow})}
-document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{F=b.dataset.f;document.querySelectorAll("[data-f]").forEach(x=>x.classList.toggle("on",x===b));render()});
-document.querySelectorAll("[data-tf]").forEach(b=>b.onclick=()=>{TF=b.dataset.tf;document.querySelectorAll("[data-tf]").forEach(x=>x.classList.toggle("on",x===b));render()});
-document.getElementById("log").onclick=e=>{LOG=!LOG;e.target.classList.toggle("on",LOG);render()};
+ Plotly.react("chart",tr0,lay,{responsive:true,displaylogo:false,scrollZoom:!narrow});
+ document.getElementById("note").innerHTML=`Heures en Europe/Paris. Unités de 1 minute à 1 mois (1W = semaine du lundi, 1M = mois calendaire). L’étoile garde une unité dans la barre. Bougies = prix de vente (open/high/low/close) ; RSI(14) sur la médiane de l’intervalle (intervalles sans vente ignorés). ${fpNote} <b>Floor live</b> = ask live le moins cher pour ce filtre, enregistré à chaque build depuis le ${fhPts.length?fhPts[0].t:"(pas encore)"}. <b>Avant cette date, le floor en pointillés est une APPROXIMATION</b> (vente la plus basse de chaque heure, ventes &lt; 5&nbsp;000 sats exclues), pas un vrai floor de listings. Ventes et listings via les API Ord Dropz (lecture seule). Pas un conseil financier.`}
+function setPop(open){const pop=document.getElementById("tfpop");pop.hidden=!open;const b=document.getElementById("tfmenu");b.setAttribute("aria-expanded",open?"true":"false");b.classList.toggle("on",open)}
+document.body.addEventListener("click",e=>{
+ const star=e.target.closest("[data-star]");
+ if(star){const id=star.dataset.star;FAVS=FAVS.includes(id)?FAVS.filter(x=>x!==id):ORDER.filter(x=>FAVS.includes(x)||x===id);savePrefs();renderTfBar();return}
+ const tf=e.target.closest("[data-tf]");
+ if(tf){TF=tf.dataset.tf;setPop(false);savePrefs();renderTfBar();render();return}
+ const mode=e.target.closest("[data-mode]");
+ if(mode){MODE=mode.dataset.mode;document.querySelectorAll("[data-mode]").forEach(x=>x.classList.toggle("on",x===mode));document.getElementById("fpband").hidden=MODE!=="fp";savePrefs();render();return}
+ const tierB=e.target.closest("[data-tier]");
+ if(tierB){TIER=tierB.dataset.tier;document.querySelectorAll("[data-tier]").forEach(x=>x.classList.toggle("on",x===tierB));savePrefs();render();return}
+ const subB=e.target.closest("[data-sub]");
+ if(subB){SUB=subB.dataset.sub;document.querySelectorAll("[data-sub]").forEach(x=>x.classList.toggle("on",x===subB));savePrefs();render();return}
+ const rankB=e.target.closest("[data-rank]");
+ if(rankB){RANK=rankB.dataset.rank;document.querySelectorAll("[data-rank]").forEach(x=>x.classList.toggle("on",x===rankB));savePrefs();render();return}
+ if(e.target.closest("#tfmenu")){setPop(document.getElementById("tfpop").hidden);return}
+ if(!e.target.closest("#tfbox"))setPop(false);
+});
+document.getElementById("log").onclick=e=>{LOG=!LOG;e.target.classList.toggle("on",LOG);savePrefs();render()};
+function readBand(){
+ const lo=parseFloat(document.getElementById("fplo").value),hi=parseFloat(document.getElementById("fphi").value);
+ if(Number.isFinite(lo)&&lo>=0.1&&lo<=1)FLO=lo;
+ if(Number.isFinite(hi)&&hi>=1&&hi<=10&&hi>FLO)FHI=hi;
+ savePrefs();if(MODE==="fp")render();
+}
+let _band;for(const id of ["fplo","fphi"])document.getElementById(id).addEventListener("input",()=>{clearTimeout(_band);_band=setTimeout(readBand,250)});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")setPop(false)});
+loadPrefs();
+document.getElementById("fplo").value=FLO;document.getElementById("fphi").value=FHI;
+document.querySelectorAll("[data-tier]").forEach(b=>b.classList.toggle("on",b.dataset.tier===TIER));
+document.querySelectorAll("[data-sub]").forEach(b=>b.classList.toggle("on",b.dataset.sub===SUB));
+document.querySelectorAll("[data-rank]").forEach(b=>b.classList.toggle("on",b.dataset.rank===RANK));
+document.querySelectorAll("[data-mode]").forEach(b=>b.classList.toggle("on",b.dataset.mode===MODE));
+document.getElementById("log").classList.toggle("on",LOG);
+document.getElementById("fpband").hidden=MODE!=="fp";
+renderTfBar();
 document.getElementById("meta").textContent=`Mis à jour ${D.generatedParis} (Paris) · ${D.trades.length} ventes du ${D.range?D.range[0]:"?"} au ${D.range?D.range[1]:"?"} · BTC/USD ${USD?"$"+Math.round(USD).toLocaleString("en-US"):"indispo"} · auto-refresh 5 min`;
-document.getElementById("note").innerHTML=`Heures en Europe/Paris. Bougies = prix de vente (open/high/low/close) par intervalle ; RSI(14) calculé sur la médiane des ventes par intervalle (intervalles sans vente ignorés). <b>Floor live</b> = ask live le moins cher, enregistré à chaque build depuis le ${D.floorHist.length?D.floorHist[0].t:"?"}. <b>Avant cette date, le floor en pointillés est une APPROXIMATION</b> (vente la plus basse de chaque heure, ventes &lt; 5&nbsp;000 sats exclues), pas un vrai floor de listings. Ventes et listings via les API Ord Dropz (lecture seule). Pas un conseil financier.`;
 let _resize;
 window.addEventListener("resize",()=>{clearTimeout(_resize);_resize=setTimeout(render,150)});
 render();
