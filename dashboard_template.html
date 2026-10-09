@@ -23,7 +23,7 @@ header{padding:12px 16px 4px}h1{font-size:18px;margin:0 0 4px}
   .stats,.ctl,.note{padding-left:10px;padding-right:10px}
   .card{min-width:0;flex:1 1 calc(50% - 8px)}
   .card .v{font-size:15px;word-break:break-word}
-  #chart{height:680px}
+  #chart{height:820px}
   .ctl .lbl{margin-left:0}
 }
 </style>
@@ -67,23 +67,28 @@ function render(){renderStats();
   T.push(`${k}<br>O ${both(a[0].p)}<br>H ${both(Math.max(...p))}<br>L ${both(Math.min(...p))}<br>C ${both(a[a.length-1].p)}<br>Médiane ${both(m)}<br>${a.length} ventes`)}
  const R=rsi(M);const btc=a=>a.map(x=>x==null?null:x/S);
  const fh=D.floorHist.filter(r=>r[F]!=null),fa=D.floorApprox[F]||[];
+ const narrow=window.innerWidth<720;
+ const nm=narrow
+  ? ["OHLC","Médiane","Floor ≈ approx.","Floor live","Volume","Ventes","RSI(14)"]
+  : ["Ventes OHLC","Médiane ventes","Floor ≈ (approx. : min ventes/h)","Floor live (historique réel)","Volume BTC","Nb ventes","RSI(14)"];
  const tr0=[
- {type:"candlestick",x:ks,open:btc(O),high:btc(H),low:btc(L),close:btc(C),name:"Ventes OHLC",text:T,hoverinfo:"text",
+ {type:"candlestick",x:ks,open:btc(O),high:btc(H),low:btc(L),close:btc(C),name:nm[0],text:T,hoverinfo:"text",
   increasing:{line:{color:"#3fb950"}},decreasing:{line:{color:"#f85149"}},yaxis:"y"},
- {type:"scatter",mode:"lines",x:ks,y:btc(M),name:"Médiane ventes",line:{color:"#d29922",width:1.5},yaxis:"y",
+ {type:"scatter",mode:"lines",x:ks,y:btc(M),name:nm[1],line:{color:"#d29922",width:1.5},yaxis:"y",
   text:M.map(both),hovertemplate:"%{x}<br>Médiane %{text}<extra></extra>"},
- {type:"scatter",mode:"lines",x:fa.map(r=>r.t),y:fa.map(r=>r.v/S),name:"Floor ≈ (approx. : min ventes/h)",line:{color:"#a371f7",width:1.5,dash:"dot"},
+ {type:"scatter",mode:"lines",x:fa.map(r=>r.t),y:fa.map(r=>r.v/S),name:nm[2],line:{color:"#a371f7",width:1.5,dash:"dot"},
   yaxis:"y",text:fa.map(r=>both(r.v)),hovertemplate:"%{x}<br>Floor approx. (min vente) %{text}<extra></extra>"},
- {type:"scatter",mode:"lines+markers",x:fh.map(r=>r.t),y:fh.map(r=>r[F]/S),name:"Floor live (historique réel)",line:{color:"#58a6ff",width:2,shape:"hv"},marker:{size:4},
+ {type:"scatter",mode:"lines+markers",x:fh.map(r=>r.t),y:fh.map(r=>r[F]/S),name:nm[3],line:{color:"#58a6ff",width:2,shape:"hv"},marker:{size:4},
   yaxis:"y",text:fh.map(r=>both(r[F])),hovertemplate:"%{x}<br>Floor live %{text}<extra></extra>"},
- {type:"bar",x:ks,y:btc(V),name:"Volume BTC",marker:{color:"#1f6feb"},yaxis:"y2",text:V.map(both),textposition:"none",hovertemplate:"%{x}<br>Volume %{text}<extra></extra>"},
- {type:"scatter",mode:"lines",x:ks,y:N,name:"Nb ventes",line:{color:"#e6edf3",width:1},yaxis:"y3",hovertemplate:"%{x}<br>%{y} ventes<extra></extra>"},
- {type:"scatter",mode:"lines",x:ks,y:R,name:"RSI(14)",line:{color:"#f778ba",width:1.5},yaxis:"y4",connectgaps:true,hovertemplate:"%{x}<br>RSI %{y:.1f}<extra></extra>"}];
+ {type:"bar",x:ks,y:btc(V),name:nm[4],marker:{color:"#1f6feb"},yaxis:"y2",text:V.map(both),textposition:"none",hovertemplate:"%{x}<br>Volume %{text}<extra></extra>"},
+ {type:"scatter",mode:"lines",x:ks,y:N,name:nm[5],line:{color:"#e6edf3",width:1},yaxis:"y3",hovertemplate:"%{x}<br>%{y} ventes<extra></extra>"},
+ {type:"scatter",mode:"lines",x:ks,y:R,name:nm[6],line:{color:"#f778ba",width:1.5},yaxis:"y4",connectgaps:true,hovertemplate:"%{x}<br>RSI %{y:.1f}<extra></extra>"}];
  const ax={gridcolor:"#21262d",zerolinecolor:"#30363d"};
  const uT=USD?` — 1 BTC ≈ $${Math.round(USD).toLocaleString("en-US")}`:"";
- const narrow=window.innerWidth<720;
- const lay={paper_bgcolor:"#0d1117",plot_bgcolor:"#0d1117",font:{color:"#e6edf3",size:narrow?10:11},margin:{l:narrow?46:60,r:narrow?40:50,t:narrow?28:10,b:30},
-  hovermode:"x unified",showlegend:true,legend:{orientation:"h",y:narrow?1.12:1.04,x:0},dragmode:"pan",
+ const lay={paper_bgcolor:"#0d1117",plot_bgcolor:"#0d1117",font:{color:"#e6edf3",size:narrow?10:11},
+  margin:{l:narrow?44:60,r:narrow?36:50,t:narrow?100:32,b:narrow?36:30},
+  hovermode:"x unified",showlegend:true,
+  legend:{orientation:"h",y:narrow?1.02:1.04,x:0,xanchor:"left",yanchor:"bottom",font:{size:narrow?10:11}},dragmode:"pan",
   xaxis:{...ax,type:"date",rangeslider:{visible:false},anchor:"y4"},
   yaxis:{...ax,domain:[0.46,1],title:{text:"Prix (BTC)"+uT},type:LOG?"log":"linear",tickformat:LOG?"":".4f"},
   yaxis2:{...ax,domain:[0.22,0.42],title:{text:"Volume BTC"}},
