@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0d1117">
+<meta http-equiv="refresh" content="300">
+<title>Shielded Nakas — Prix · Volume · RSI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0d1117;color:#e6edf3;font-family:-apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:12px 16px 4px}h1{font-size:18px;margin:0 0 4px}
+.sub{color:#8b949e;font-size:12px}
+.stats{display:flex;flex-wrap:wrap;gap:8px;padding:8px 16px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:8px 12px;min-width:140px;flex:1 1 140px}
+.card .k{color:#8b949e;font-size:11px;text-transform:uppercase}.card .v{font-size:17px;font-weight:600}
+.card .u{color:#8b949e;font-size:12px}.up{color:#3fb950}.down{color:#f85149}
+.ctl{display:flex;flex-wrap:wrap;gap:6px;padding:4px 16px;align-items:center}
+.ctl button{background:#21262d;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:6px 10px;cursor:pointer;font:inherit}
+.ctl button.on{background:#1f6feb;border-color:#1f6feb}.ctl .lbl{color:#8b949e;font-size:12px;margin-left:6px}
+#chart{height:860px;width:100%}
+.note{color:#8b949e;font-size:11px;padding:4px 16px 16px;line-height:1.5}
+@media (max-width:720px){
+  header{padding:10px 10px 4px}h1{font-size:16px}
+  .stats,.ctl,.note{padding-left:10px;padding-right:10px}
+  .card{min-width:0;flex:1 1 calc(50% - 8px)}
+  .card .v{font-size:15px;word-break:break-word}
+  #chart{height:680px}
+  .ctl .lbl{margin-left:0}
+}
+</style>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script></head><body>
+<header><h1>🔒 Shielded Nakas — Prix · Volume · RSI</h1>
+<div class="sub" id="meta"></div></header>
+<div class="stats" id="stats"></div>
+<div class="ctl"><span class="lbl">Filtre</span>
+<button data-f="all" class="on">Tous</button><button data-f="hi">Legendary+Epic</button>
+<button data-f="sub100">sub100</button><button data-f="sub1k">sub1k</button>
+<span class="lbl">Intervalle</span>
+<button data-tf="h1" class="on">1h</button><button data-tf="h4">4h</button><button data-tf="d1">1j</button>
+<span class="lbl">Échelle</span><button id="log">Log</button></div>
+<div id="chart"></div>
+<div class="note" id="note"></div>
+<script>
+const D=__DATA__;const USD=D.btcUsd;const S=1e8;
+let F="all",TF="h1",LOG=false;
+const fb=s=>s==null?"—":(s/S).toFixed(8).replace(/0+$/,"").replace(/\.$/,"")+" BTC";
+const fu=s=>(s==null||!USD)?"":"~$"+Math.round(s/S*USD).toLocaleString("en-US");
+const both=s=>s==null?"—":fb(s)+(USD?" ("+fu(s)+")":"");
+const FN={all:"Tous",hi:"Legendary+Epic",sub100:"sub100",sub1k:"sub1k"};
+const inF=(f,r)=>f==="all"||(f==="hi"?(r.tier==="Legendary"||r.tier==="Epic"):r.sub===f);
+const med=a=>{const b=[...a].sort((x,y)=>x-y),m=b.length>>1;return b.length%2?b[m]:(b[m-1]+b[m])/2};
+function rsi(c,n=14){const o=Array(c.length).fill(null);if(c.length<=n)return o;let g=0,l=0;
+ for(let i=1;i<=n;i++){const d=c[i]-c[i-1];d>0?g+=d:l-=d}g/=n;l/=n;
+ o[n]=l===0?100:100-100/(1+g/l);
+ for(let i=n+1;i<c.length;i++){const d=c[i]-c[i-1];g=(g*(n-1)+Math.max(d,0))/n;l=(l*(n-1)+Math.max(-d,0))/n;o[i]=l===0?100:100-100/(1+g/l)}return o}
+function renderStats(){const s=D.stats[F];const c=s.chg;
+ const cards=[["Floor actuel ("+FN[F]+")",fb(s.floor),fu(s.floor)],
+ ["Volume 24h",fb(s.vol24),fu(s.vol24)],["Ventes 24h",s.n24,""],
+ ["Médiane 24h",fb(s.med24),c==null?"pas de base J-1":`<span class="${c>=0?"up":"down"}">${c>=0?"+":""}${(c*100).toFixed(1)}%</span> vs 24h précédentes`],
+ ["Listés (live)",s.listed,F==="all"?"sur "+D.supply:""]];
+ document.getElementById("stats").innerHTML=cards.map(([k,v,u])=>`<div class="card"><div class="k">${k}</div><div class="v">${v}</div><div class="u">${u}</div></div>`).join("")}
+function render(){renderStats();
+ const tr=D.trades.filter(r=>inF(F,r));const g=new Map();
+ for(const r of tr){const k=r[TF];if(!g.has(k))g.set(k,[]);g.get(k).push(r)}
+ const ks=[...g.keys()].sort();const O=[],H=[],L=[],C=[],M=[],V=[],N=[],T=[];
+ for(const k of ks){const a=g.get(k),p=a.map(r=>r.p);O.push(a[0].p);C.push(a[a.length-1].p);
+  H.push(Math.max(...p));L.push(Math.min(...p));const m=med(p);M.push(m);const v=p.reduce((x,y)=>x+y,0);V.push(v);N.push(a.length);
+  T.push(`${k}<br>O ${both(a[0].p)}<br>H ${both(Math.max(...p))}<br>L ${both(Math.min(...p))}<br>C ${both(a[a.length-1].p)}<br>Médiane ${both(m)}<br>${a.length} ventes`)}
+ const R=rsi(M);const btc=a=>a.map(x=>x==null?null:x/S);
+ const fh=D.floorHist.filter(r=>r[F]!=null),fa=D.floorApprox[F]||[];
+ const tr0=[
+ {type:"candlestick",x:ks,open:btc(O),high:btc(H),low:btc(L),close:btc(C),name:"Ventes OHLC",text:T,hoverinfo:"text",
+  increasing:{line:{color:"#3fb950"}},decreasing:{line:{color:"#f85149"}},yaxis:"y"},
+ {type:"scatter",mode:"lines",x:ks,y:btc(M),name:"Médiane ventes",line:{color:"#d29922",width:1.5},yaxis:"y",
+  text:M.map(both),hovertemplate:"%{x}<br>Médiane %{text}<extra></extra>"},
+ {type:"scatter",mode:"lines",x:fa.map(r=>r.t),y:fa.map(r=>r.v/S),name:"Floor ≈ (approx. : min ventes/h)",line:{color:"#a371f7",width:1.5,dash:"dot"},
+  yaxis:"y",text:fa.map(r=>both(r.v)),hovertemplate:"%{x}<br>Floor approx. (min vente) %{text}<extra></extra>"},
+ {type:"scatter",mode:"lines+markers",x:fh.map(r=>r.t),y:fh.map(r=>r[F]/S),name:"Floor live (historique réel)",line:{color:"#58a6ff",width:2,shape:"hv"},marker:{size:4},
+  yaxis:"y",text:fh.map(r=>both(r[F])),hovertemplate:"%{x}<br>Floor live %{text}<extra></extra>"},
+ {type:"bar",x:ks,y:btc(V),name:"Volume BTC",marker:{color:"#1f6feb"},yaxis:"y2",text:V.map(both),textposition:"none",hovertemplate:"%{x}<br>Volume %{text}<extra></extra>"},
+ {type:"scatter",mode:"lines",x:ks,y:N,name:"Nb ventes",line:{color:"#e6edf3",width:1},yaxis:"y3",hovertemplate:"%{x}<br>%{y} ventes<extra></extra>"},
+ {type:"scatter",mode:"lines",x:ks,y:R,name:"RSI(14)",line:{color:"#f778ba",width:1.5},yaxis:"y4",connectgaps:true,hovertemplate:"%{x}<br>RSI %{y:.1f}<extra></extra>"}];
+ const ax={gridcolor:"#21262d",zerolinecolor:"#30363d"};
+ const uT=USD?` — 1 BTC ≈ $${Math.round(USD).toLocaleString("en-US")}`:"";
+ const narrow=window.innerWidth<720;
+ const lay={paper_bgcolor:"#0d1117",plot_bgcolor:"#0d1117",font:{color:"#e6edf3",size:narrow?10:11},margin:{l:narrow?46:60,r:narrow?40:50,t:narrow?28:10,b:30},
+  hovermode:"x unified",showlegend:true,legend:{orientation:"h",y:narrow?1.12:1.04,x:0},dragmode:"pan",
+  xaxis:{...ax,type:"date",rangeslider:{visible:false},anchor:"y4"},
+  yaxis:{...ax,domain:[0.46,1],title:{text:"Prix (BTC)"+uT},type:LOG?"log":"linear",tickformat:LOG?"":".4f"},
+  yaxis2:{...ax,domain:[0.22,0.42],title:{text:"Volume BTC"}},
+  yaxis3:{...ax,domain:[0.22,0.42],overlaying:"y2",side:"right",title:{text:"Ventes"},showgrid:false},
+  yaxis4:{...ax,domain:[0,0.18],range:[0,100],title:{text:"RSI 14"},tickvals:[30,50,70]},
+  shapes:[30,70].map(v=>({type:"line",xref:"paper",x0:0,x1:1,yref:"y4",y0:v,y1:v,line:{color:v===70?"#f85149":"#3fb950",dash:"dash",width:1}}))};
+ Plotly.react("chart",tr0,lay,{responsive:true,displaylogo:false,scrollZoom:!narrow})}
+document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{F=b.dataset.f;document.querySelectorAll("[data-f]").forEach(x=>x.classList.toggle("on",x===b));render()});
+document.querySelectorAll("[data-tf]").forEach(b=>b.onclick=()=>{TF=b.dataset.tf;document.querySelectorAll("[data-tf]").forEach(x=>x.classList.toggle("on",x===b));render()});
+document.getElementById("log").onclick=e=>{LOG=!LOG;e.target.classList.toggle("on",LOG);render()};
+document.getElementById("meta").textContent=`Mis à jour ${D.generatedParis} (Paris) · ${D.trades.length} ventes du ${D.range?D.range[0]:"?"} au ${D.range?D.range[1]:"?"} · BTC/USD ${USD?"$"+Math.round(USD).toLocaleString("en-US"):"indispo"} · auto-refresh 5 min`;
+document.getElementById("note").innerHTML=`Heures en Europe/Paris. Bougies = prix de vente (open/high/low/close) par intervalle ; RSI(14) calculé sur la médiane des ventes par intervalle (intervalles sans vente ignorés). <b>Floor live</b> = ask live le moins cher, enregistré à chaque build depuis le ${D.floorHist.length?D.floorHist[0].t:"?"}. <b>Avant cette date, le floor en pointillés est une APPROXIMATION</b> (vente la plus basse de chaque heure, ventes &lt; 5&nbsp;000 sats exclues), pas un vrai floor de listings. Ventes et listings via les API Ord Dropz (lecture seule). Pas un conseil financier.`;
+let _resize;
+window.addEventListener("resize",()=>{clearTimeout(_resize);_resize=setTimeout(render,150)});
+render();
+</script></body></html>
