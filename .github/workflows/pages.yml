@@ -1,0 +1,87 @@
+# Rebuild the dashboard and publish it to GitHub Pages.
+# Cron runs only after this file is on the default branch. GitHub may start a
+# scheduled run a few minutes late.
+#
+# enablement: true is set as requested. The default GITHUB_TOKEN cannot create
+# a Pages site, so Settings → Pages → Source must be "GitHub Actions" once.
+# See the README.
+
+name: Build and deploy dashboard
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore:
+      # The floor-history commit below only touches this file. Ignoring it
+      # stops a follow-up run if a token other than GITHUB_TOKEN is used later.
+      # Pushes made with GITHUB_TOKEN do not start workflows anyway.
+      - "data/floor_history.csv"
+
+permissions:
+  pages: write
+  id-token: write
+  contents: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 100
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Use the latest floor history
+        run: |
+          git fetch origin main
+          git checkout origin/main -- data/floor_history.csv
+
+      - name: Build dashboard
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: python build_dashboard.py
+
+      - name: Commit floor history
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/floor_history.csv
+          if git diff --staged --quiet; then
+            echo "Floor history unchanged"
+            exit 0
+          fi
+          git commit -m "Update floor history"
+          git fetch origin main
+          GIT_EDITOR=true git rebase origin/main
+          git push origin HEAD:main
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
