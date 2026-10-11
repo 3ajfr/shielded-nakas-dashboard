@@ -199,7 +199,7 @@ import {OrbitControls} from './OrbitControls.js';
 import {EffectComposer} from './jsm/postprocessing/EffectComposer.js';import {RenderPass} from './jsm/postprocessing/RenderPass.js';
 import {UnrealBloomPass} from './jsm/postprocessing/UnrealBloomPass.js';import {OutputPass} from './jsm/postprocessing/OutputPass.js';
 import {RoomEnvironment} from './jsm/environments/RoomEnvironment.js';
-const VERSION='v0.6.1'; // bump on each release
+const VERSION='v0.7'; // bump on each release
 const D = await (await fetch('data.json?'+Date.now())).json();
 const U = D.btcUsd||0, items = D.items, byNo = new Map(items.map(i=>[i.no,i]));
 const btc = s => s==null?'—':(s/1e8).toFixed(s<1e6?5:4)+' BTC';
@@ -503,6 +503,7 @@ function market(){const M=document.getElementById('mkt'),hr=TF=='24h',src=hr?(D.
  M.querySelectorAll('.tf').forEach(x=>x.onclick=()=>setTf(x.dataset.tf));
  document.getElementById('mkMin').onclick=()=>M.classList.toggle('min');}
 market();
+window.VAULT={sfx,prizeImg:byNo.get(1052)?img(byNo.get(1052)):null}; // used by flappy.js
 {const hm=new Date(D.generatedAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',hour12:false});document.getElementById('lver').textContent=VERSION+' · DATA '+hm;document.getElementById('ver').innerHTML=`<b>${VERSION}</b> · data updated ${hm}`;}
 
 // ================= MOBILE UI =================
@@ -555,4 +556,5 @@ document.getElementById('enter').onclick=enter;if(sp.has('enter')||sp.get('sim')
 const q=new URLSearchParams(location.search).get('q');if(q){document.getElementById('q').value=q;search();}
 if(sp.get('sim')){openSim(sp.get('sim'));document.getElementById('simGo').click();}
 if(sp.get('open')){const it=byNo.get(+sp.get('open'));if(it){card(it);flyTo([it.no]);}}
-</script></body></html>
+</script><script src="flappy.js" defer></script>
+</body></html>
