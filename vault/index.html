@@ -20,6 +20,11 @@ button{font:17px Anton,Impact,sans-serif;letter-spacing:.04em;text-transform:upp
 button:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 #000}button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
 button.dark{background:var(--cr)}
 #stats{top:70px;left:10px;width:265px;font-size:13px;line-height:1.6}#stats b{font:15px Anton,sans-serif;color:var(--o);letter-spacing:.04em}
+#chips{margin:6px 0}.cg{font:13px Anton,sans-serif;color:var(--cr);letter-spacing:.05em;margin:6px 0 3px}
+.chip{display:inline-flex;align-items:center;gap:4px;font:12px SG,sans-serif;font-weight:700;background:#1b1612;color:var(--cr);border:2px solid #4a423a;border-radius:3px;padding:2px 6px;margin:2px;cursor:pointer;user-select:none;transition:transform .1s}
+.chip:hover{transform:translateY(-1px);border-color:var(--o)}.chip.on{background:var(--o);color:#000;border-color:#000;box-shadow:2px 2px 0 #000}
+.chip i{display:inline-block;width:10px;height:10px;border:1px solid #000}.chip em{font-style:normal;font-weight:400;opacity:.8;font-size:11px}
+.chip.clr{background:var(--red);color:#fff;border-color:#000}#fcount{font-size:12px;margin-top:4px}#fcount b{font:16px Anton;color:var(--o)}
 #legend span{display:inline-block;width:11px;height:11px;margin:0 4px 0 8px;border:1px solid #000}
 #card{display:none;right:10px;top:70px;width:310px;perspective:1000px}
 #cardIn{animation:flip .9s cubic-bezier(.2,1.3,.3,1);transform-style:preserve-3d;background:var(--o);color:#000;border:3px solid #000;box-shadow:8px 8px 0 #000}
@@ -76,7 +81,7 @@ button.dark{background:var(--cr)}
 <div id="prize" class="hud" title="Fly to the contest prize"><img id="bImg" alt="">THE PRIZE · #1052</div>
 <div id="top" class="hud"><h1>THE VAULT</h1>
 <input id="q" placeholder="Try: Epic sub1k under 0.002 BTC · legendary listed · #2109 · laser eyes snipe">
-<button id="go">Search</button><button id="simple" class="dark">☰ Simple mode</button><button id="simBtn">🪙 $SHNAKAS</button><button id="share">📸 Naka of the day</button><button id="reset" class="dark">⟲</button></div>
+<button id="go">Search</button><button id="simple" class="dark">☰ Simple mode</button><button id="simBtn">🪙 $SHNAKAS</button><button id="share">📸 Naka of the day</button><button id="music" class="dark" title="Music on/off">♪ OFF</button><button id="sfx" class="dark" title="Sound effects on/off">🔊 SFX</button><button id="reset" class="dark">⟲</button></div>
 <div id="stats" class="hud panel"></div>
 <div id="card" class="hud"><div id="cardIn" class="panel"></div></div>
 <div id="res" class="hud panel"></div>
@@ -122,18 +127,24 @@ const geo=new THREE.BoxGeometry(.86,.86,.5), mat=new THREE.MeshPhysicalMaterial(
 const mesh=new THREE.InstancedMesh(geo,mat,items.length); S.add(mesh);
 const pos=[], m4=new THREE.Matrix4(), col=new THREE.Color();
 items.forEach((it,k)=>{const x=(k%COLS-COLS/2)*G, y=(rows/2-Math.floor(k/COLS))*G; pos.push(new THREE.Vector3(x,y,0));});
-let hl=null,hov=-1; // Set of highlighted nos
+let hl=null,hov=-1; // Set of highlighted nos (search)
+const FT=new Set(),FS=new Set();let FL=false;
+{const u=new URLSearchParams(location.search);(u.get('tier')||'').split(',').filter(Boolean).forEach(t=>FT.add(t[0].toUpperCase()+t.slice(1).toLowerCase()));
+ (u.get('sub')||'').split(',').filter(Boolean).forEach(x=>FS.add(x.toLowerCase()));FL=u.get('listed')=='1';}
+const fOn=()=>FT.size||FS.size||FL;
+const fOK=it=>(!FT.size||FT.has(it.tier))&&(!FS.size||FS.has(it.sub))&&(!FL||it.ask);
+const anyF=()=>hl||fOn();const act=it=>(!hl||hl.has(it.no))&&fOK(it);
 function paint(t=0){items.forEach((it,k)=>{
   const p=pos[k]; let z=it.ask?.35:0, s=1;
   if(it.snipe){s=1+.15*Math.sin(t*6);z=.6;}
-  if(hl&&hl.has(it.no)){z=1.2;s=1.15}
+  if(anyF()&&act(it)){z=1.2;s=1.15}
   if(k==hov){z+=1.4;s*=1.25}
   if(it.no==PRIZE){z+=.9;s*=1.2+.08*Math.sin(t*4);}
   m4.makeScale(s,s,s).setPosition(p.x,p.y,z); mesh.setMatrixAt(k,m4);
   col.setHex(it.no==PRIZE?0xff1a1a:it.snipe?0xff2020:TC[it.tier]||0x555);
   if(it.no==PRIZE) col.multiplyScalar(4); else if(!it.ask) col.multiplyScalar(.22); else col.multiplyScalar(it.snipe?3:1.6);
   if(k==hov) col.multiplyScalar(2);
-  if(hl&&!hl.has(it.no)) col.multiplyScalar(.25);
+  if(anyF()&&!act(it)) col.multiplyScalar(.08);
   mesh.setColorAt(k,col);});
   mesh.instanceMatrix.needsUpdate=true; mesh.instanceColor.needsUpdate=true;}
 // back plate + frame
@@ -152,7 +163,7 @@ const rsiTxt=D.rsi==null?'—':D.rsi+(D.rsi>70?' 🔥 overbought':D.rsi<30?' �
 document.getElementById('stats').innerHTML=`<b>Floor</b> ${P(D.floor)}<br><b>Listed</b> ${D.listed} / ${D.total}<br>
 <b>24h volume</b> ${P(D.vol24)} · ${D.sales24} sales<br><b>RSI(14, hourly)</b> ${rsiTxt}<br>
 <b>Snipes</b> <span class="snipe">${items.filter(i=>i.snipe).length}</span> pulsing red<br>
-<div id="legend">${Object.entries(TC).slice(0,5).map(([k,v])=>`<span style="background:#${v.toString(16).padStart(6,'0')}"></span>${k}`).join('')}</div>
+<div id="chips"></div>
 <small>Bright = listed · dim = vaulted · tower = daily median sale (red = today, gold ring = floor). Updated ${new Date(D.generatedAt).toLocaleString()}</small>`;
 const img=it=>`https://ordinals.com/content/${it.id}`;
 function sparks(x,y){for(let i=0;i<26;i++){const e=document.createElement('i');e.className='spark';const a=Math.random()*6.28,d=60+Math.random()*120;
@@ -178,7 +189,7 @@ let fly=null;function flyTo(nos){const ks=nos.map(n=>items.findIndex(i=>i.no==n)
  sel=nos.length==1?nos[0]:null;startFly(c.clone().add(new THREE.Vector3(0,-2,Math.min(90,6+sp*1.4))),c,1.1);}
 let saved=null,sel=null;window.vaultBack=()=>goBack();
 const ease=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
-function startFly(to,tt,dur=1.1,z){fly={from:cam.position.clone(),tf:ctl.target.clone(),to:to.clone(),tt:tt.clone(),zf:cam.zoom,zt:z??cam.zoom,t0:performance.now(),dur:dur*1000};}
+function startFly(to,tt,dur=1.1,z){try{sfx.whoosh()}catch(e){}fly={from:cam.position.clone(),tf:ctl.target.clone(),to:to.clone(),tt:tt.clone(),zf:cam.zoom,zt:z??cam.zoom,t0:performance.now(),dur:dur*1000};}
 function goBack(){document.getElementById('card').style.display='none';sel=null;
  if(saved){startFly(saved.p,saved.t,1.1,saved.z);saved=null;}}
 addEventListener('keydown',e=>{if(e.key=='Escape'&&document.activeElement.id!='q')goBack();});
@@ -188,7 +199,7 @@ cv.addEventListener('pointermove',e=>{if(e.pointerType!='mouse')return;mv.set(e.
 cv.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY];fly=null;});
 cv.addEventListener('pointerup',e=>{if(Math.hypot(e.clientX-down[0],e.clientY-down[1])>6)return;
  mv.set(e.clientX/innerWidth*2-1,-e.clientY/innerHeight*2+1);rc.setFromCamera(mv,cam);const h=rc.intersectObject(mesh)[0];
- if(h){const it=items[h.instanceId];if(it.no===sel){goBack();return;}card(it);flyTo([it.no]);}});
+ if(h){sfx.blip();const it=items[h.instanceId];if(it.no===sel){goBack();return;}card(it);flyTo([it.no]);}});
 cv.addEventListener('wheel',()=>{fly=null},{passive:true});
 // --- natural-ish search ---
 function parse(q){q=q.toLowerCase();const f=[];let m;
@@ -206,18 +217,75 @@ function parse(q){q=q.toLowerCase();const f=[];let m;
  if(words.length)f.push(it=>{const t=Object.values(it.traits).join(' ').toLowerCase();return words.every(w=>t.includes(w));});
  return it=>f.every(g=>g(it));}
 function search(){const q=document.getElementById('q').value.trim();const r=document.getElementById('res');
- if(!q){hl=null;r.style.display='none';return;}
- const fs=items.filter(parse(q)).sort((a,b)=>(a.ask||9e15)-(b.ask||9e15)||a.rank-b.rank);hl=new Set(fs.map(i=>i.no));
- r.style.display='block';r.innerHTML=`<b>${fs.length} result(s)</b><br>`+fs.slice(0,60).map(i=>`<div class="r" data-n="${i.no}">#${i.no} · ${i.tier} · rank ${i.rank} · ${i.sub} · ${i.ask?P(i.ask):'vaulted'}</div>`).join('');
+ if(!q){hl=null;r.style.display='none';chips();if(simple)renderList();return;}
+ const fs=items.filter(parse(q)).filter(fOK).sort((a,b)=>(a.ask||9e15)-(b.ask||9e15)||a.rank-b.rank);hl=new Set(fs.map(i=>i.no));
+ hl=new Set(items.filter(parse(q)).map(i=>i.no));chips();if(simple)renderList();r.style.display='block';r.innerHTML=`<b>${fs.length} result(s)</b><br>`+fs.slice(0,60).map(i=>`<div class="r" data-n="${i.no}">#${i.no} · ${i.tier} · rank ${i.rank} · ${i.sub} · ${i.ask?P(i.ask):'vaulted'}</div>`).join('');
  r.querySelectorAll('.r').forEach(e=>e.onclick=()=>{const it=byNo.get(+e.dataset.n);card(it);flyTo([it.no]);});
  flyTo(fs.map(i=>i.no));}
 document.getElementById('go').onclick=search;document.getElementById('q').onkeydown=e=>e.key=='Enter'&&search();
-document.getElementById('reset').onclick=()=>{hl=null;document.getElementById('q').value='';document.getElementById('res').style.display='none';(saved=null,sel=null,startFly(HOME,new THREE.Vector3(),1.2));};
+document.getElementById('reset').onclick=()=>{hl=null;FT.clear();FS.clear();FL=false;syncF();document.getElementById('q').value='';document.getElementById('res').style.display='none';(saved=null,sel=null,startFly(HOME,new THREE.Vector3(),1.2));};
+
+// --- procedural audio (Web Audio, no files) ---
+const AU={ctx:null,master:null,music:null,sfx:null,on:false,sfxOn:localStorage.getItem('vaultSfx')!=='0',timer:null,step:0,next:0};
+function ac(){if(!AU.ctx){const C=new (window.AudioContext||window.webkitAudioContext)();AU.ctx=C;
+ AU.master=C.createGain();AU.master.gain.value=.5;AU.master.connect(C.destination);
+ AU.music=C.createGain();AU.music.gain.value=0;AU.music.connect(AU.master);AU.sfx=C.createGain();AU.sfx.gain.value=.5;AU.sfx.connect(AU.master);
+ AU.dly=C.createDelay(1);AU.dly.delayTime.value=60/130*.75;const fb=C.createGain();fb.gain.value=.38;const dl=C.createBiquadFilter();dl.type='lowpass';dl.frequency.value=2500;
+ AU.dly.connect(dl);dl.connect(fb);fb.connect(AU.dly);dl.connect(AU.music);
+ AU.dist=C.createWaveShaper();const cu=new Float32Array(1024);for(let i=0;i<1024;i++){const x=i/512-1;cu[i]=Math.tanh(x*4);}AU.dist.curve=cu;
+ const bl=C.createBiquadFilter();bl.type='lowpass';bl.frequency.value=900;AU.dist.connect(bl);bl.connect(AU.music);
+ const nb=C.createBuffer(1,C.sampleRate,C.sampleRate),d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;AU.noise=nb;}
+ if(AU.ctx.state=='suspended')AU.ctx.resume();return AU.ctx;}
+function env(g,t,a,peak,dec){g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(peak,t+a);g.gain.exponentialRampToValueAtTime(0.0001,t+a+dec);}
+function osc(type,f,t,dur,peak,dest,f2){const C=AU.ctx,o=C.createOscillator(),g=C.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);
+ env(g,t,.003,peak,dur);o.connect(g);g.connect(dest);o.start(t);o.stop(t+dur+.05);return g;}
+function noise(t,dur,peak,dest,type='highpass',freq=7000){const C=AU.ctx,s=C.createBufferSource(),f=C.createBiquadFilter(),g=C.createGain();s.buffer=AU.noise;f.type=type;f.frequency.value=freq;
+ env(g,t,.002,peak,dur);s.connect(f);f.connect(g);g.connect(dest);s.start(t,Math.random()*.5);s.stop(t+dur+.05);}
+const BASS=[36,36,48,36,39,36,46,43],ARP=[60,63,67,70,72,70,67,63],mt=n=>440*Math.pow(2,(n-69)/12);
+function tick(){const C=AU.ctx,sp=60/130/4;while(AU.next<C.currentTime+.12){const t=AU.next,st=AU.step%16,bar=Math.floor(AU.step/16)%4;
+ if(st%4==0)osc('sine',150,t,.28,.9,AU.music,42);                  // kick
+ if(st%4==2)noise(t,.05,.22,AU.music);                            // open-ish hat
+ if(st%2==1)noise(t,.02,.08,AU.music);                            // closed hat
+ if(st==4||st==12)noise(t,.14,.18,AU.music,'bandpass',1800);      // snare-ish clap
+ if(st%2==0){const n=BASS[(st/2)%8]+(bar==3?5:0);osc('sawtooth',mt(n),t,sp*1.6,.25,AU.dist);}
+ if(st%3==0){const n=ARP[(AU.step/3|0)%8]+(bar>=2?12:0);const g=osc('square',mt(n),t,.12,.05,AU.music);g.connect(AU.dly);}
+ if(st==0&&AU.step%64==0){[48,55,63].forEach(n=>{const o=C.createOscillator(),g=C.createGain();o.type='triangle';o.frequency.value=mt(n);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.04,t+2);g.gain.linearRampToValueAtTime(.0001,t+7);o.connect(g);g.connect(AU.dly);g.connect(AU.music);o.start(t);o.stop(t+7.2);});}
+ AU.next+=sp;AU.step++;}}
+function setMusic(on){AU.on=on;localStorage.setItem('vaultMusic',on?'1':'0');document.getElementById('music').textContent=on?'♪ ON':'♪ OFF';
+ if(on){const C=ac();AU.music.gain.cancelScheduledValues(C.currentTime);AU.music.gain.linearRampToValueAtTime(.32,C.currentTime+1);AU.next=C.currentTime+.05;clearInterval(AU.timer);AU.timer=setInterval(tick,25);}
+ else if(AU.ctx){AU.music.gain.linearRampToValueAtTime(0,AU.ctx.currentTime+.4);setTimeout(()=>{if(!AU.on)clearInterval(AU.timer)},500);}}
+function setSfx(on){AU.sfxOn=on;localStorage.setItem('vaultSfx',on?'1':'0');document.getElementById('sfx').textContent=on?'🔊 SFX':'🔇 SFX';}
+const sfx={blip(){if(!AU.sfxOn)return;const C=ac();osc('square',880,C.currentTime,.05,.08,AU.sfx,1320);},
+ whoosh(){if(!AU.sfxOn||!AU.ctx)return;const C=AU.ctx,t=C.currentTime,s=C.createBufferSource(),f=C.createBiquadFilter(),g=C.createGain();s.buffer=AU.noise;f.type='bandpass';f.Q.value=1.2;
+  f.frequency.setValueAtTime(300,t);f.frequency.exponentialRampToValueAtTime(2200,t+.45);f.frequency.exponentialRampToValueAtTime(400,t+.9);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.12,t+.3);g.gain.exponentialRampToValueAtTime(.0001,t+.9);
+  s.connect(f);f.connect(g);g.connect(AU.sfx);s.start(t);s.stop(t+1);},
+ clink(d=0){if(!AU.sfxOn)return;const C=ac(),t=C.currentTime+d;[2637,3520,4186].forEach((f,i)=>osc('sine',f*(1+Math.random()*.02),t+i*.012,.18,.035,AU.sfx));}};
+document.getElementById('music').onclick=()=>setMusic(!AU.on);document.getElementById('sfx').onclick=()=>setSfx(!AU.sfxOn);setSfx(AU.sfxOn);
+document.addEventListener('click',e=>{if(e.target.closest('button,.chip,.r,#prize'))sfx.blip();},true);
+// music starts OFF until a user click; if previously ON, resume on first interaction
+if(localStorage.getItem('vaultMusic')=='1')document.addEventListener('pointerdown',()=>{if(!AU.on)setMusic(true)},{once:true});
+// --- filter chips ---
+function chips(){const tiers=['Legendary','Epic','Rare','Uncommon','Common'],subs=['sub10','sub100','sub1k','sub10k'];
+ const cnt=(f)=>[items.filter(f).length,items.filter(i=>f(i)&&i.ask).length];
+ const ch=(g,v,lab,sw)=>{const [n,l]=cnt(g=='t'?i=>i.tier==v:i=>i.sub==v);const on=(g=='t'?FT:FS).has(v);
+  return `<span class="chip${on?' on':''}" data-g="${g}" data-v="${v}">${sw?`<i style="background:#${sw.toString(16).padStart(6,'0')}"></i>`:''}${lab} <em>${n} · ${l} listed</em></span>`;};
+ const m=items.filter(act).length;
+ document.getElementById('chips').innerHTML=`<div class="cg">TIER</div>${tiers.map(t=>ch('t',t,t,TC[t])).join('')}
+ <div class="cg">SHIELDED #</div>${subs.map(x=>ch('s',x,x)).join('')}
+ <div class="cg">OPTIONS</div><span class="chip${FL?' on':''}" data-g="l">Listed only</span>${fOn()?'<span class="chip clr" data-g="c">✕ Clear filters</span>':''}
+ <div id="fcount">${anyF()?`<b>${m}</b> matching locker${m==1?'':'s'}${hl?' (with search)':''}`:'Tap chips to filter · tier AND Shielded #'}</div>`;
+ document.querySelectorAll('#chips .chip').forEach(c=>c.onclick=()=>{const g=c.dataset.g,v=c.dataset.v;
+  if(g=='t')FT.has(v)?FT.delete(v):FT.add(v);else if(g=='s')FS.has(v)?FS.delete(v):FS.add(v);else if(g=='l')FL=!FL;else{FT.clear();FS.clear();FL=false;}
+  syncF();});}
+function syncF(){const u=new URL(location.href);const set=(k,v)=>v?u.searchParams.set(k,v):u.searchParams.delete(k);
+ set('tier',[...FT].map(t=>t.toLowerCase()).join(','));set('sub',[...FS].join(','));set('listed',FL?'1':'');
+ history.replaceState(null,'',u.toString().replace(/%2C/g,','));chips();if(simple)renderList();}
 // --- simple mode ---
-let simple=false;document.getElementById('simple').onclick=()=>{simple=!simple;const L=document.getElementById('list');L.style.display=simple?'block':'none';
- if(simple){const src=hl?items.filter(i=>hl.has(i.no)):items.filter(i=>i.ask);src.sort((a,b)=>a.ask/a.fair-b.ask/b.fair);
- L.innerHTML=`<b>${hl?'Search results':'Listed Nakas'} — best deal first</b><table><tr><th>#</th><th>Tier</th><th>Rank</th><th>Shielded #</th><th>Price</th><th>Fair value</th><th>Deal</th></tr>`+
- src.map(i=>`<tr><td>${i.no}</td><td>${i.tier}</td><td>${i.rank}</td><td>${i.num} (${i.sub})</td><td>${P(i.ask)}</td><td>${P(i.fair)}</td><td class="${i.snipe?'snipe':''}">${i.ask?Math.round((1-i.ask/i.fair)*100)+'%':''}</td></tr>`).join('')+'</table>';}};
+let simple=false;document.getElementById('simple').onclick=()=>{simple=!simple;document.getElementById('list').style.display=simple?'block':'none';if(simple)renderList();};
+function renderList(){const L=document.getElementById('list');const src=anyF()?items.filter(act):items.filter(i=>i.ask);
+ const dl=i=>i.ask?i.ask/i.fair:9e9;src.sort((a,b)=>dl(a)-dl(b)||a.rank-b.rank);
+ L.innerHTML=`<b>${anyF()?src.length+' filtered Nakas':'Listed Nakas'} — best deal first</b><table><tr><th>#</th><th>Tier</th><th>Rank</th><th>Shielded #</th><th>Price</th><th>Fair value</th><th>Deal</th></tr>`+
+ src.map(i=>`<tr><td>${i.no}</td><td>${i.tier}</td><td>${i.rank}</td><td>${i.num} (${i.sub})</td><td>${P(i.ask)}</td><td>${P(i.fair)}</td><td class="${i.snipe?'snipe':''}">${i.ask?Math.round((1-i.ask/i.fair)*100)+'%':''}</td></tr>`).join('')+'</table>';}
 // --- $SHNAKAS simulator (relative estimate) ---
 document.getElementById('simBtn').onclick=()=>document.getElementById('sim').classList.toggle('show');
 const coins=[];
@@ -231,7 +299,7 @@ document.getElementById('simGo').onclick=()=>{const it=byNo.get(+document.getEle
  <p>${it.ask?'<strong>Listed pieces earn nothing.</strong> Delist to start earning.':'Unlisted: earning.'}</p>
  <p class="n">Estimate only. Based on ${un} unlisted pieces. Trait bonuses not included.</p></div>`;
  card(it);flyTo([it.no]);if(!it.ask){const k=items.indexOf(it);coins.splice(0).forEach(c=>S.remove(c));for(let j=0;j<6;j++){const c=new THREE.Mesh(new THREE.CylinderGeometry(.11,.11,.03,16),new THREE.MeshStandardMaterial({color:0xd9a441,metalness:.6,roughness:.45}));
- c.position.set(pos[k].x+(j-2.5)*.15,pos[k].y+1.2+j*.15,.9);c.rotation.x=Math.PI/2;c.userData={y0:pos[k].y,v:0,born:performance.now()};S.add(c);coins.push(c);}}};
+ c.position.set(pos[k].x+(j-2.5)*.15,pos[k].y+1.2+j*.15,.9);c.rotation.x=Math.PI/2;c.userData={y0:pos[k].y,v:0,born:performance.now()};S.add(c);coins.push(c);sfx.clink(.25+j*.11);}}};
 // --- Naka of the day share card ---
 document.getElementById('share').onclick=async()=>{const it=byNo.get(D.nakaOfDay);if(!it)return;card(it);flyTo([it.no]);
  const c=document.createElement('canvas');c.width=1200;c.height=675;const x=c.getContext('2d');
@@ -251,6 +319,7 @@ if(pk>=0){ring=new THREE.Mesh(new THREE.TorusGeometry(1,.09,8,32),new THREE.Mesh
  const pu=img(items[pk]);document.getElementById('pImg').src=pu;document.getElementById('bImg').src=pu;}
 document.getElementById('prize').onclick=()=>{const it=byNo.get(PRIZE);if(it){card(it);flyTo([PRIZE]);}};
 document.getElementById('lLive').innerHTML=`LIVE · Floor <b>${P(D.floor)}</b> · ${D.listed} listed · 24h vol <b>${P(D.vol24)}</b>`;
+chips();
 const clk=new THREE.Clock();paint();
 document.getElementById('perf').textContent=LOW?'LITE MODE · bloom off':'BLOOM ON · add ?lite for low-end';
 const sp=new URLSearchParams(location.search);
