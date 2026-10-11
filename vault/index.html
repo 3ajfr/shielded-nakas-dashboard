@@ -42,6 +42,8 @@ button.dark{background:var(--cr)}
 .deal .t{font:22px Anton,sans-serif}.deal .m{font-size:13px}.deal .pc{font:26px Anton,sans-serif;background:#000;color:var(--o);padding:2px 8px;display:inline-block}.deal .pc.hot{background:var(--red);color:#fff}
 .deal .act{display:flex;flex-direction:column;gap:6px;align-items:stretch}.deal .act a{font:14px Anton;text-align:center;color:#000}
 @media(max-width:800px){#ex{left:10px;right:10px;top:104px}#mkt{display:none}#mkt.show{display:block;top:auto;bottom:10px;left:10px;right:10px;width:auto}.deal{grid-template-columns:30px 54px 1fr}.deal .act{grid-column:1/4;flex-direction:row}}
+#lver{position:absolute;top:18px;right:22px;z-index:2;font-size:20px;transform:rotate(3deg);background:#000;color:var(--o);border:2px solid var(--cr)}
+#ver{left:10px;bottom:4px;font:11px Anton,sans-serif;letter-spacing:.06em;color:#8a7e68;z-index:6}#ver b{background:#000;color:var(--o);padding:0 4px;border:1px solid var(--o)}
 #chips{margin:6px 0}.cg{font:13px Anton,sans-serif;color:var(--cr);letter-spacing:.05em;margin:6px 0 3px}
 .chip{display:inline-flex;align-items:center;gap:4px;font:12px SG,sans-serif;font-weight:700;background:#1b1612;color:var(--cr);border:2px solid #4a423a;border-radius:3px;padding:2px 6px;margin:2px;cursor:pointer;user-select:none;transition:transform .1s}
 .chip:hover{transform:translateY(-1px);border-color:var(--o)}.chip.on{background:var(--o);color:#000;border-color:#000;box-shadow:2px 2px 0 #000}
@@ -93,8 +95,8 @@ button.dark{background:var(--cr)}
 @media(max-width:800px){#land{grid-template-columns:1fr;grid-template-rows:auto 1fr auto;overflow:auto}#land .L{clip-path:none;padding:50px 20px 16px}#land .L img{width:46vw}#land .steps{grid-column:1}
  #stats{width:auto;right:10px;font-size:12px;top:116px}#prize{left:auto;right:10px;top:auto;bottom:70px}#card{left:10px;right:10px;width:auto;top:auto;bottom:10px}#sim{display:none}#sim.show{display:block}}
 </style></head><body class="landing">
-<canvas id="c"></canvas><div id="fx"></div><div id="grain"></div><div id="perf"></div>
-<div id="land"><div class="L"><span class="stk">THE PRIZE</span><img id="pImg" alt="Shielded Nakas #1052"><div class="cap">SHIELDED NAKAS #1052 · RED HOODIE</div></div>
+<canvas id="c"></canvas><div id="fx"></div><div id="grain"></div><div id="perf"></div><div id="ver" class="hud"></div>
+<div id="land"><div id="lver" class="stk"></div><div class="L"><span class="stk">THE PRIZE</span><img id="pImg" alt="Shielded Nakas #1052"><div class="cap">SHIELDED NAKAS #1052 · RED HOODIE</div></div>
 <div class="Rt"><div class="kick">ORD DROPZ DEVELOPER CHALLENGE · ENTRY</div><h2>THE<br><em>VAULT.</em></h2>
 <div class="sub">3,327 Shielded Nakas. One 3D vault.</div>
 <div class="box">FIND SNIPES · TRACK THE FLOOR<br>SIMULATE $SHNAKAS</div><div class="live" id="lLive"></div>
@@ -116,6 +118,7 @@ import {OrbitControls} from './OrbitControls.js';
 import {EffectComposer} from './jsm/postprocessing/EffectComposer.js';import {RenderPass} from './jsm/postprocessing/RenderPass.js';
 import {UnrealBloomPass} from './jsm/postprocessing/UnrealBloomPass.js';import {OutputPass} from './jsm/postprocessing/OutputPass.js';
 import {RoomEnvironment} from './jsm/environments/RoomEnvironment.js';
+const VERSION='v0.4'; // bump on each release
 const D = await (await fetch('data.json?'+Date.now())).json();
 const U = D.btcUsd||0, items = D.items, byNo = new Map(items.map(i=>[i.no,i]));
 const btc = s => s==null?'—':(s/1e8).toFixed(s<1e6?5:4)+' BTC';
@@ -401,6 +404,7 @@ function market(){const M=document.getElementById('mkt'),ser=D.series.slice(-14)
   tip.innerHTML=`<b>${s.d}</b><br>Floor ${P(s.floor)}${s.floorSrc=='lowsale'?' <small>(median sale, pre-tracking)</small>':''}<br>Volume ${P(s.vol)} · ${s.n} sales<br>Median sale ${P(s.med)}`;};h.onmouseleave=()=>tip.style.display='none';});
  document.getElementById('mkMin').onclick=()=>M.classList.toggle('min');}
 market();
+{const hm=new Date(D.generatedAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',hour12:false});document.getElementById('lver').textContent=VERSION+' · DATA '+hm;document.getElementById('ver').innerHTML=`<b>${VERSION}</b> · data updated ${hm}`;}
 const clk=new THREE.Clock();paint();
 document.getElementById('perf').textContent=LOW?'LITE MODE · bloom off':'BLOOM ON · add ?lite for low-end';
 const sp=new URLSearchParams(location.search);
