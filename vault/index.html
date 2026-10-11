@@ -199,7 +199,7 @@ import {OrbitControls} from './OrbitControls.js';
 import {EffectComposer} from './jsm/postprocessing/EffectComposer.js';import {RenderPass} from './jsm/postprocessing/RenderPass.js';
 import {UnrealBloomPass} from './jsm/postprocessing/UnrealBloomPass.js';import {OutputPass} from './jsm/postprocessing/OutputPass.js';
 import {RoomEnvironment} from './jsm/environments/RoomEnvironment.js';
-const VERSION='v0.6'; // bump on each release
+const VERSION='v0.6.1'; // bump on each release
 const D = await (await fetch('data.json?'+Date.now())).json();
 const U = D.btcUsd||0, items = D.items, byNo = new Map(items.map(i=>[i.no,i]));
 const btc = s => s==null?'—':(s/1e8).toFixed(s<1e6?5:4)+' BTC';
@@ -267,7 +267,7 @@ const img=it=>`https://ordinals.com/content/${it.id}`;
 function sparks(x,y){for(let i=0;i<26;i++){const e=document.createElement('i');e.className='spark';const a=Math.random()*6.28,d=60+Math.random()*120;
  e.style.cssText=`left:${x}px;top:${y}px;background:${['#f26a1b','#000','#f3ead6','#d81e1e'][i%4]};box-shadow:0 0 10px currentColor;--x:${Math.cos(a)*d}px;--y:${Math.sin(a)*d}px`;
  document.body.appendChild(e);setTimeout(()=>e.remove(),950);}}
-function card(it){const c=document.getElementById('card');c.style.display='block';const ci=document.getElementById('cardIn');
+let cardAt=0;function card(it){cardAt=performance.now();const c=document.getElementById('card');c.style.display='block';const ci=document.getElementById('cardIn');
  ci.style.animation='none';ci.offsetHeight;ci.style.animation='';
  const deal=it.ask?Math.round((1-it.ask/it.fair)*100):null;
  setTimeout(()=>{const b=ci.getBoundingClientRect();sparks(b.left+b.width/2,b.top+60)},350);
@@ -285,7 +285,7 @@ let fly=null;function flyTo(nos){const ks=nos.map(n=>items.findIndex(i=>i.no==n)
  let sp=0;ks.forEach(k=>sp=Math.max(sp,pos[k].distanceTo(c)));
  if(!saved&&!fly)saved={p:cam.position.clone(),t:ctl.target.clone(),z:cam.zoom};
  sel=nos.length==1?nos[0]:null;startFly(c.clone().add(new THREE.Vector3(0,-2,Math.min(90,6+sp*1.4))),c);}
-let saved=null,sel=null;window.vaultBack=()=>goBack();
+let saved=null,sel=null;window.vaultBack=()=>{if(performance.now()-cardAt<400)return;goBack();};
 const ease=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
 function startFly(to,tt,dur,z){const from=cam.position.clone();dur=dur??(1.4+Math.random()*.4);
  const d=to.clone().sub(from),L=d.length(),side=new THREE.Vector3(-d.y,d.x,0).normalize();if(!isFinite(side.x))side.set(1,0,0);
@@ -531,8 +531,8 @@ if(MOB){document.body.classList.add('t-vault');
  const ci=document.getElementById('cardIn');let y0=null,dy=0;
  ci.addEventListener('touchstart',e=>{y0=ci.scrollTop<=0?e.touches[0].clientY:null;dy=0;},{passive:true});
  ci.addEventListener('touchmove',e=>{if(y0==null)return;dy=Math.max(0,e.touches[0].clientY-y0);ci.style.transform=`translateY(${dy}px)`;},{passive:true});
- ci.addEventListener('touchend',()=>{if(y0==null)return;ci.style.transform='';if(dy>90)window.vaultBack();y0=null;});
- document.getElementById('card').addEventListener('click',e=>{if(e.target.id=='card')window.vaultBack();});
+ ci.addEventListener('touchend',()=>{if(y0==null)return;ci.style.transform='';if(dy>90&&performance.now()-cardAt>400)window.vaultBack();y0=null;});
+ document.getElementById('card').addEventListener('click',e=>{if(e.target.id=='card'&&performance.now()-cardAt>400)window.vaultBack();});
  const t0=new URLSearchParams(location.search).get('tab');if(t0)setTimeout(()=>setTab(t0),0);
 }
 const clk=new THREE.Clock();paint();
