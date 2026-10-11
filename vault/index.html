@@ -31,6 +31,9 @@ button.dark{background:var(--cr)}
 .spark{position:fixed;width:7px;height:7px;pointer-events:none;z-index:9;animation:sp .9s ease-out forwards}
 @keyframes sp{to{transform:translate(var(--x),var(--y)) rotate(200deg) scale(0);opacity:0}}
 #sim{left:10px;bottom:10px;width:300px;font-size:13px}#sim input{width:90px;padding:6px;background:var(--k);color:#fff;border:2px solid var(--cr);border-radius:3px}
+.simres{background:var(--cr);color:#000;border:2px solid #000;margin-top:10px;padding:10px}.simres .sh{font:16px Anton,sans-serif;letter-spacing:.03em}
+.simres .g{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.simres .g div{background:#fff;border:2px solid #000;padding:6px}.simres .g .w{grid-column:1/3}
+.simres span{display:block;font-size:12px;font-weight:700;color:#333}.simres b{font:30px Anton,sans-serif;color:#000}.simres p{margin:4px 0;font-size:13px}.simres .n{font-size:11px;color:#444}
 #sim b:first-child{font:18px Anton,sans-serif;color:var(--o)}
 #res{bottom:10px;right:10px;width:310px;max-height:40vh;overflow:auto;display:none;font-size:13px}
 .r{padding:6px;border-bottom:1px dashed rgba(242,106,27,.5);cursor:pointer;transition:all .15s}.r:hover{background:var(--o);color:#000;padding-left:12px}
@@ -100,7 +103,7 @@ R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.1;
 const S=new THREE.Scene(); S.background=new THREE.Color(0x0d0b09); S.fog=new THREE.FogExp2(0x0d0b09,.007);
 S.environment=new THREE.PMREMGenerator(R).fromScene(new RoomEnvironment(),.04).texture;
 const cam=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,.1,500); const HOME=new THREE.Vector3(0,-4,innerWidth<700?95:70);cam.position.set(0,-60,170);
-const ctl=new OrbitControls(cam,cv); ctl.enableDamping=true; ctl.maxDistance=140; ctl.minDistance=4;
+const ctl=new OrbitControls(cam,cv); ctl.enableDamping=true;ctl.dampingFactor=.07;ctl.rotateSpeed=.7;ctl.zoomSpeed=.8; ctl.maxDistance=140; ctl.minDistance=4;
 S.add(new THREE.AmbientLight(0xffffff,.55)); const dl=new THREE.DirectionalLight(0xffffff,1.1); dl.position.set(20,30,50); S.add(dl);
 const red=new THREE.PointLight(0xf26a1b,90,120); red.position.set(-25,10,22); S.add(red);
 const cy=new THREE.PointLight(0xf3ead6,50,120); cy.position.set(30,-15,22); S.add(cy);
@@ -159,7 +162,7 @@ function card(it){const c=document.getElementById('card');c.style.display='block
  ci.style.animation='none';ci.offsetHeight;ci.style.animation='';
  const deal=it.ask?Math.round((1-it.ask/it.fair)*100):null;
  setTimeout(()=>{const b=ci.getBoundingClientRect();sparks(b.left+b.width/2,b.top+60)},350);
- ci.innerHTML=`<div style="display:flex;justify-content:space-between"><span class="ttl">NAKAS #${it.no}</span><a href="#" onclick="document.getElementById('card').style.display='none';return false" style="color:#aaa">✕</a></div>
+ ci.innerHTML=`<div style="display:flex;justify-content:space-between"><span><button class="dark" style="font-size:13px;padding:2px 8px;margin-right:6px" onclick="window.vaultBack()">‹ Back</button><span class="ttl">NAKAS #${it.no}</span></span><a href="#" onclick="window.vaultBack();return false" style="color:#aaa">✕</a></div>
  <img src="${img(it)}" alt=""><table>
  <tr><td>Tier</td><td><b>${it.tier}</b></td></tr><tr><td>Rank</td><td>${it.rank} / ${D.total}</td></tr>
  <tr><td>Shielded #</td><td>${it.num} (${it.sub})</td></tr>
@@ -171,14 +174,22 @@ function card(it){const c=document.getElementById('card');c.style.display='block
 let fly=null;function flyTo(nos){const ks=nos.map(n=>items.findIndex(i=>i.no==n)).filter(k=>k>=0);if(!ks.length)return;
  const c=new THREE.Vector3();ks.forEach(k=>c.add(pos[k]));c.divideScalar(ks.length);
  let sp=0;ks.forEach(k=>sp=Math.max(sp,pos[k].distanceTo(c)));
- fly={from:cam.position.clone(),tf:ctl.target.clone(),to:c.clone().add(new THREE.Vector3(0,-2,Math.min(90,6+sp*1.4))),tt:c,t:0};}
+ if(!saved&&!fly)saved={p:cam.position.clone(),t:ctl.target.clone(),z:cam.zoom};
+ sel=nos.length==1?nos[0]:null;startFly(c.clone().add(new THREE.Vector3(0,-2,Math.min(90,6+sp*1.4))),c,1.1);}
+let saved=null,sel=null;window.vaultBack=()=>goBack();
+const ease=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+function startFly(to,tt,dur=1.1,z){fly={from:cam.position.clone(),tf:ctl.target.clone(),to:to.clone(),tt:tt.clone(),zf:cam.zoom,zt:z??cam.zoom,t0:performance.now(),dur:dur*1000};}
+function goBack(){document.getElementById('card').style.display='none';sel=null;
+ if(saved){startFly(saved.p,saved.t,1.1,saved.z);saved=null;}}
+addEventListener('keydown',e=>{if(e.key=='Escape'&&document.activeElement.id!='q')goBack();});
 // raycast
 const rc=new THREE.Raycaster(),mv=new THREE.Vector2();let down;
 cv.addEventListener('pointermove',e=>{if(e.pointerType!='mouse')return;mv.set(e.clientX/innerWidth*2-1,-e.clientY/innerHeight*2+1);rc.setFromCamera(mv,cam);const h=rc.intersectObject(mesh)[0];hov=h?h.instanceId:-1;cv.style.cursor=h?'pointer':'grab';});
-cv.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
+cv.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY];fly=null;});
 cv.addEventListener('pointerup',e=>{if(Math.hypot(e.clientX-down[0],e.clientY-down[1])>6)return;
  mv.set(e.clientX/innerWidth*2-1,-e.clientY/innerHeight*2+1);rc.setFromCamera(mv,cam);const h=rc.intersectObject(mesh)[0];
- if(h){const it=items[h.instanceId];card(it);flyTo([it.no]);}});
+ if(h){const it=items[h.instanceId];if(it.no===sel){goBack();return;}card(it);flyTo([it.no]);}});
+cv.addEventListener('wheel',()=>{fly=null},{passive:true});
 // --- natural-ish search ---
 function parse(q){q=q.toLowerCase();const f=[];let m;
  if(m=q.match(/#\s*(\d+)/))return it=>it.no==+m[1];
@@ -201,7 +212,7 @@ function search(){const q=document.getElementById('q').value.trim();const r=docu
  r.querySelectorAll('.r').forEach(e=>e.onclick=()=>{const it=byNo.get(+e.dataset.n);card(it);flyTo([it.no]);});
  flyTo(fs.map(i=>i.no));}
 document.getElementById('go').onclick=search;document.getElementById('q').onkeydown=e=>e.key=='Enter'&&search();
-document.getElementById('reset').onclick=()=>{hl=null;document.getElementById('q').value='';document.getElementById('res').style.display='none';fly={from:cam.position.clone(),tf:ctl.target.clone(),to:HOME.clone(),tt:new THREE.Vector3(),t:0};};
+document.getElementById('reset').onclick=()=>{hl=null;document.getElementById('q').value='';document.getElementById('res').style.display='none';(saved=null,sel=null,startFly(HOME,new THREE.Vector3(),1.2));};
 // --- simple mode ---
 let simple=false;document.getElementById('simple').onclick=()=>{simple=!simple;const L=document.getElementById('list');L.style.display=simple?'block':'none';
  if(simple){const src=hl?items.filter(i=>hl.has(i.no)):items.filter(i=>i.ask);src.sort((a,b)=>a.ask/a.fair-b.ask/b.fair);
@@ -213,11 +224,14 @@ const coins=[];
 document.getElementById('simGo').onclick=()=>{const it=byNo.get(+document.getElementById('simN').value);const o=document.getElementById('simOut');
  if(!it){o.innerHTML='Unknown #';return;}const b=D.subBonus[it.sub]||0, w=1+b;
  const tot=items.filter(i=>!i.ask).reduce((s,i)=>s+1+(D.subBonus[i.sub]||0),0);
- o.innerHTML=`#${it.no} · Shielded # ${it.num} (${it.sub}) · bonus <b>+${b*100}%</b><br>Weight <b>${w.toFixed(1)}×</b> a basic Naka<br>
- Est. share of daily pool: <b>${it.ask?'0 — listed pieces earn nothing':(w/tot*100).toFixed(4)+'%'}</b><br>
- <small>${it.ask?'Delist to start earning. ':''}Based on currently unlisted pieces (${items.filter(i=>!i.ask).length}). Trait bonuses not included. Estimate only.</small>`;
- card(it);flyTo([it.no]);if(!it.ask){const k=items.indexOf(it);for(let j=0;j<25;j++){const c=new THREE.Mesh(new THREE.CylinderGeometry(.18,.18,.05,16),new THREE.MeshStandardMaterial({color:0xffc23d,emissive:0xff9900,emissiveIntensity:1.5,metalness:1,roughness:.15}));
- c.position.set(pos[k].x+(Math.random()-.5),pos[k].y+3+j*.4,.8);c.rotation.x=Math.PI/2;c.userData={y0:pos[k].y,v:0};S.add(c);coins.push(c);}}};
+ const un=items.filter(i=>!i.ask).length;
+ o.innerHTML=`<div class="simres"><div class="sh">NAKAS #${it.no} · Shielded # ${it.num} (${it.sub})</div>
+ <div class="g"><div><span>Bonus</span><b>+${b*100}%</b></div><div><span>Weight</span><b>${w.toFixed(1)}×</b></div>
+ <div class="w"><span>Est. share of daily pool</span><b>${it.ask?'0%':(w/tot*100).toFixed(4)+'%'}</b></div></div>
+ <p>${it.ask?'<strong>Listed pieces earn nothing.</strong> Delist to start earning.':'Unlisted: earning.'}</p>
+ <p class="n">Estimate only. Based on ${un} unlisted pieces. Trait bonuses not included.</p></div>`;
+ card(it);flyTo([it.no]);if(!it.ask){const k=items.indexOf(it);coins.splice(0).forEach(c=>S.remove(c));for(let j=0;j<6;j++){const c=new THREE.Mesh(new THREE.CylinderGeometry(.11,.11,.03,16),new THREE.MeshStandardMaterial({color:0xd9a441,metalness:.6,roughness:.45}));
+ c.position.set(pos[k].x+(j-2.5)*.15,pos[k].y+1.2+j*.15,.9);c.rotation.x=Math.PI/2;c.userData={y0:pos[k].y,v:0,born:performance.now()};S.add(c);coins.push(c);}}};
 // --- Naka of the day share card ---
 document.getElementById('share').onclick=async()=>{const it=byNo.get(D.nakaOfDay);if(!it)return;card(it);flyTo([it.no]);
  const c=document.createElement('canvas');c.width=1200;c.height=675;const x=c.getContext('2d');
@@ -241,15 +255,16 @@ const clk=new THREE.Clock();paint();
 document.getElementById('perf').textContent=LOW?'LITE MODE · bloom off':'BLOOM ON · add ?lite for low-end';
 const sp=new URLSearchParams(location.search);
 const enter=()=>{document.getElementById('land').classList.add('gone');document.body.classList.remove('landing');
- if(!sp.has('noIntro'))fly={from:cam.position.clone(),tf:ctl.target.clone(),to:HOME.clone(),tt:new THREE.Vector3(),t:0,slow:1};else cam.position.copy(HOME);};
-document.getElementById('enter').onclick=enter;if(sp.has('enter')||sp.get('open')||sp.get('q'))enter();
+ if(!sp.has('noIntro'))startFly(HOME,new THREE.Vector3(),2.4);else cam.position.copy(HOME);};
+document.getElementById('enter').onclick=enter;if(sp.has('enter')||sp.get('sim')||sp.get('open')||sp.get('q'))enter();
 (function loop(){const t=clk.getElapsedTime();if(Math.floor(t*30)%2==0)paint(t);
- if(fly){fly.t=Math.min(1,fly.t+(fly.slow?.008:.025));const e=1-Math.pow(1-fly.t,3);cam.position.lerpVectors(fly.from,fly.to,e);ctl.target.lerpVectors(fly.tf,fly.tt,e);if(fly.t>=1)fly=null;}
+ if(fly){const k=Math.min(1,(performance.now()-fly.t0)/fly.dur),e=ease(k);cam.position.lerpVectors(fly.from,fly.to,e);ctl.target.lerpVectors(fly.tf,fly.tt,e);cam.zoom=fly.zf+(fly.zt-fly.zf)*e;cam.updateProjectionMatrix();if(k>=1)fly=null;}
  red.intensity=80+25*Math.sin(t*3);tower.rotation.y=Math.sin(t*.3)*.3;
- for(const c of coins){c.userData.v+=.01;c.position.y=Math.max(c.userData.y0+.2,c.position.y-c.userData.v);c.rotation.z+=.1;c.material.emissiveIntensity=1+Math.abs(Math.sin(t*12+c.position.x*5))*3;}
+ for(let i=coins.length-1;i>=0;i--){const c=coins[i];c.userData.v=Math.min(.04,c.userData.v+.004);c.position.y=Math.max(c.userData.y0+.2,c.position.y-c.userData.v);if(performance.now()-c.userData.born>1400){S.remove(c);coins.splice(i,1);}}
  grid.position.z=(t*6)%4;stars.rotation.z=t*.004;sun.material.opacity=.15+.05*Math.sin(t);cy.intensity=60+20*Math.sin(t*2.3);
  if(ring){ring.rotation.z=t*1.5;ring.scale.setScalar(1+.15*Math.sin(t*4));}
  ctl.update();comp?comp.render():R.render(S,cam);requestAnimationFrame(loop);})();
 const q=new URLSearchParams(location.search).get('q');if(q){document.getElementById('q').value=q;search();}
+if(sp.get('sim')){document.getElementById('sim').classList.add('show');document.getElementById('simN').value=sp.get('sim');document.getElementById('simGo').click();}
 if(sp.get('open')){const it=byNo.get(+sp.get('open'));if(it){card(it);flyTo([it.no]);}}
 </script></body></html>
