@@ -20,6 +20,28 @@ button{font:17px Anton,Impact,sans-serif;letter-spacing:.04em;text-transform:upp
 button:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 #000}button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
 button.dark{background:var(--cr)}
 #stats{top:70px;left:10px;width:265px;font-size:13px;line-height:1.6}#stats b{font:15px Anton,sans-serif;color:var(--o);letter-spacing:.04em}
+
+#ex{top:58px;left:300px;right:360px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px}
+.exq{background:var(--cr);color:#000;font-weight:700;border:2px solid #000;padding:2px 8px;cursor:pointer;box-shadow:2px 2px 0 #000}.exq:hover{background:var(--o)}
+#sfb{font:15px Anton,sans-serif;letter-spacing:.04em;color:var(--o);margin-right:4px}#sfb.no{color:var(--red)}
+#prize{top:96px!important}
+#mkt{top:70px;right:10px;width:340px;padding:10px 12px}
+#mkt h3{margin:0;font:22px Anton,sans-serif;letter-spacing:.03em;display:flex;justify-content:space-between;align-items:center}
+#mkt .big{font:34px Anton,sans-serif;color:var(--cr);line-height:1}#mkt .ch{font:18px Anton;padding:1px 6px;margin-left:6px}#mkt .up{background:#2bd46a;color:#000}#mkt .dn{background:var(--red);color:#fff}
+#mkt .lab{font:12px Anton,sans-serif;letter-spacing:.06em;color:var(--o);margin-top:4px}
+#mkt svg text{font-family:SG,sans-serif;font-size:9px;fill:#cfc3ab}#mkt svg .hit{fill:transparent;cursor:crosshair}#mkt svg .hit:hover{fill:rgba(242,106,27,.15)}
+#mkt .row{display:flex;gap:10px;align-items:center}#mkt small{font-size:10px}
+#tip{position:fixed;z-index:30;pointer-events:none;background:#000;color:var(--cr);border:2px solid var(--o);padding:5px 8px;font-size:12px;display:none;box-shadow:3px 3px 0 var(--o)}
+#mkt.min .body{display:none}
+#card{z-index:8}
+#list{background:var(--k);color:var(--cr);border:3px solid var(--o)}
+#list .dh{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}#list .dh h2{margin:0;font:40px Anton,sans-serif;color:var(--o);text-shadow:3px 3px 0 #000}
+#dchips{background:#1b1612;border:2px dashed var(--o);padding:6px 8px;margin:8px 0}#dchips .cg{display:inline-block;margin:0 6px 0 10px}#dchips input{width:90px;padding:4px;background:var(--k);color:#fff;border:2px solid var(--cr)}
+.deal{display:grid;grid-template-columns:44px 64px 1fr auto;gap:12px;align-items:center;background:var(--cr);color:#000;border:3px solid #000;box-shadow:5px 5px 0 var(--o);margin:10px 4px;padding:8px}
+.deal .rk{font:30px Anton,sans-serif;text-align:center}.deal img{width:64px;height:64px;image-rendering:pixelated;border:2px solid #000;background:var(--o)}
+.deal .t{font:22px Anton,sans-serif}.deal .m{font-size:13px}.deal .pc{font:26px Anton,sans-serif;background:#000;color:var(--o);padding:2px 8px;display:inline-block}.deal .pc.hot{background:var(--red);color:#fff}
+.deal .act{display:flex;flex-direction:column;gap:6px;align-items:stretch}.deal .act a{font:14px Anton;text-align:center;color:#000}
+@media(max-width:800px){#ex{left:10px;right:10px;top:104px}#mkt{display:none}#mkt.show{display:block;top:auto;bottom:10px;left:10px;right:10px;width:auto}.deal{grid-template-columns:30px 54px 1fr}.deal .act{grid-column:1/4;flex-direction:row}}
 #chips{margin:6px 0}.cg{font:13px Anton,sans-serif;color:var(--cr);letter-spacing:.05em;margin:6px 0 3px}
 .chip{display:inline-flex;align-items:center;gap:4px;font:12px SG,sans-serif;font-weight:700;background:#1b1612;color:var(--cr);border:2px solid #4a423a;border-radius:3px;padding:2px 6px;margin:2px;cursor:pointer;user-select:none;transition:transform .1s}
 .chip:hover{transform:translateY(-1px);border-color:var(--o)}.chip.on{background:var(--o);color:#000;border-color:#000;box-shadow:2px 2px 0 #000}
@@ -80,14 +102,14 @@ button.dark{background:var(--cr)}
 <div class="steps"><span>SEARCH</span><i>›</i><span>SNIPE</span><i>›</i><span>HOLD</span><i>›</i><span>SHARE</span><span class="url">built on the Shielded API · ord-dropz.xyz</span></div></div>
 <div id="prize" class="hud" title="Fly to the contest prize"><img id="bImg" alt="">THE PRIZE · #1052</div>
 <div id="top" class="hud"><h1>THE VAULT</h1>
-<input id="q" placeholder="Try: Epic sub1k under 0.002 BTC · legendary listed · #2109 · laser eyes snipe">
-<button id="go">Search</button><button id="simple" class="dark">☰ Simple mode</button><button id="simBtn">🪙 $SHNAKAS</button><button id="share">📸 Naka of the day</button><button id="music" class="dark" title="Music on/off">♪ OFF</button><button id="sfx" class="dark" title="Sound effects on/off">🔊 SFX</button><button id="reset" class="dark">⟲</button></div>
-<div id="stats" class="hud panel"></div>
+<form id="sf" autocomplete="off" style="display:contents"><input id="q" type="search" enterkeyhint="search" placeholder="Search: 2109 · Epic sub1k under 0.002 BTC · laser eyes"><button id="go" type="submit">Search</button></form><button id="simple" class="dark">🏷 BEST DEALS</button><button id="simBtn">🪙 $SHNAKAS</button><button id="share">📸 Naka of the day</button><button id="music" class="dark" title="Music on/off">♪ OFF</button><button id="sfx" class="dark" title="Sound effects on/off">🔊 SFX</button><button id="reset" class="dark">⟲</button></div>
+<div id="ex" class="hud"><span id="sfb"></span><span class="exq">2109</span><span class="exq">Epic sub1k under 0.003 BTC</span><span class="exq">legendary listed</span><span class="exq">laser eyes</span><span class="exq">sub100 deal</span></div>
+<div id="stats" class="hud panel"></div><div id="mkt" class="hud panel"></div>
 <div id="card" class="hud"><div id="cardIn" class="panel"></div></div>
 <div id="res" class="hud panel"></div>
 <div id="sim" class="hud panel"><b>🪙 $SHNAKAS rewards simulator</b><br><small>Estimate only — not official numbers.</small><br>
 Naka # <input id="simN" type="number" min="1" max="3327" placeholder="2109"> <button id="simGo">Simulate</button><div id="simOut"></div></div>
-<div id="list" class="panel"></div>
+<div id="list" class="panel"></div><div id="tip"></div>
 <script type="module">
 import * as THREE from './three.module.min.js';
 import {OrbitControls} from './OrbitControls.js';
@@ -128,11 +150,11 @@ const mesh=new THREE.InstancedMesh(geo,mat,items.length); S.add(mesh);
 const pos=[], m4=new THREE.Matrix4(), col=new THREE.Color();
 items.forEach((it,k)=>{const x=(k%COLS-COLS/2)*G, y=(rows/2-Math.floor(k/COLS))*G; pos.push(new THREE.Vector3(x,y,0));});
 let hl=null,hov=-1; // Set of highlighted nos (search)
-const FT=new Set(),FS=new Set();let FL=false;
+const FT=new Set(),FS=new Set();let FL=false,FMAX=0;
 {const u=new URLSearchParams(location.search);(u.get('tier')||'').split(',').filter(Boolean).forEach(t=>FT.add(t[0].toUpperCase()+t.slice(1).toLowerCase()));
- (u.get('sub')||'').split(',').filter(Boolean).forEach(x=>FS.add(x.toLowerCase()));FL=u.get('listed')=='1';}
-const fOn=()=>FT.size||FS.size||FL;
-const fOK=it=>(!FT.size||FT.has(it.tier))&&(!FS.size||FS.has(it.sub))&&(!FL||it.ask);
+ (u.get('sub')||'').split(',').filter(Boolean).forEach(x=>FS.add(x.toLowerCase()));FL=u.get('listed')=='1';FMAX=+(u.get('max')||0);}
+const fOn=()=>FT.size||FS.size||FL||FMAX;
+const fOK=it=>(!FT.size||FT.has(it.tier))&&(!FS.size||FS.has(it.sub))&&(!FL||it.ask)&&(!FMAX||(it.ask&&it.ask<=FMAX*1e8));
 const anyF=()=>hl||fOn();const act=it=>(!hl||hl.has(it.no))&&fOK(it);
 function paint(t=0){items.forEach((it,k)=>{
   const p=pos[k]; let z=it.ask?.35:0, s=1;
@@ -150,21 +172,13 @@ function paint(t=0){items.forEach((it,k)=>{
 // back plate + frame
 const plate=new THREE.Mesh(new THREE.PlaneGeometry(COLS+4,rows+4),new THREE.MeshStandardMaterial({color:0x0b0614,metalness:.9,roughness:.5}));
 plate.position.z=-.4; S.add(plate);
-// glass price tower(s): one per day of recent median price; tallest glows
-const tower=new THREE.Group(); tower.position.set(COLS/2+8,-rows/2,0); S.add(tower);
-const ser=D.series.slice(-14), mx=Math.max(...ser.map(s=>s.med));
-ser.forEach((s,i)=>{const h=Math.max(.5,s.med/mx*rows*.9);
-  const g=new THREE.Mesh(new THREE.BoxGeometry(1.4,h,1.4),new THREE.MeshPhysicalMaterial({color:i==ser.length-1?0xd81e1e:0xf26a1b,emissive:i==ser.length-1?0x400000:0x301000,iridescence:1,transmission:.6,transparent:true,opacity:.55,roughness:.1,metalness:.1}));
-  g.position.set((i%2)*1.8,h/2,-Math.floor(i/2)*1.8); tower.add(g);});
-const fl=new THREE.Mesh(new THREE.TorusGeometry(2.4,.08,8,40),new THREE.MeshBasicMaterial({color:0xf3ead6}));
-fl.rotation.x=Math.PI/2; fl.position.set(.9,(D.floor/mx)*rows*.9,-5); tower.add(fl);
 // --- hud ---
 const rsiTxt=D.rsi==null?'—':D.rsi+(D.rsi>70?' 🔥 overbought':D.rsi<30?' 🧊 oversold':' neutral');
 document.getElementById('stats').innerHTML=`<b>Floor</b> ${P(D.floor)}<br><b>Listed</b> ${D.listed} / ${D.total}<br>
 <b>24h volume</b> ${P(D.vol24)} · ${D.sales24} sales<br><b>RSI(14, hourly)</b> ${rsiTxt}<br>
 <b>Snipes</b> <span class="snipe">${items.filter(i=>i.snipe).length}</span> pulsing red<br>
 <div id="chips"></div>
-<small>Bright = listed · dim = vaulted · tower = daily median sale (red = today, gold ring = floor). Updated ${new Date(D.generatedAt).toLocaleString()}</small>`;
+<small>Bright = listed · dim = vaulted · market chart top-right. Updated ${new Date(D.generatedAt).toLocaleString()}</small>`;
 const img=it=>`https://ordinals.com/content/${it.id}`;
 function sparks(x,y){for(let i=0;i<26;i++){const e=document.createElement('i');e.className='spark';const a=Math.random()*6.28,d=60+Math.random()*120;
  e.style.cssText=`left:${x}px;top:${y}px;background:${['#f26a1b','#000','#f3ead6','#d81e1e'][i%4]};box-shadow:0 0 10px currentColor;--x:${Math.cos(a)*d}px;--y:${Math.sin(a)*d}px`;
@@ -186,21 +200,26 @@ let fly=null;function flyTo(nos){const ks=nos.map(n=>items.findIndex(i=>i.no==n)
  const c=new THREE.Vector3();ks.forEach(k=>c.add(pos[k]));c.divideScalar(ks.length);
  let sp=0;ks.forEach(k=>sp=Math.max(sp,pos[k].distanceTo(c)));
  if(!saved&&!fly)saved={p:cam.position.clone(),t:ctl.target.clone(),z:cam.zoom};
- sel=nos.length==1?nos[0]:null;startFly(c.clone().add(new THREE.Vector3(0,-2,Math.min(90,6+sp*1.4))),c,1.1);}
+ sel=nos.length==1?nos[0]:null;startFly(c.clone().add(new THREE.Vector3(0,-2,Math.min(90,6+sp*1.4))),c);}
 let saved=null,sel=null;window.vaultBack=()=>goBack();
 const ease=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
-function startFly(to,tt,dur=1.1,z){try{sfx.whoosh()}catch(e){}fly={from:cam.position.clone(),tf:ctl.target.clone(),to:to.clone(),tt:tt.clone(),zf:cam.zoom,zt:z??cam.zoom,t0:performance.now(),dur:dur*1000};}
+function startFly(to,tt,dur,z){const from=cam.position.clone();dur=dur??(1.4+Math.random()*.4);
+ const d=to.clone().sub(from),L=d.length(),side=new THREE.Vector3(-d.y,d.x,0).normalize();if(!isFinite(side.x))side.set(1,0,0);
+ const sg=Math.random()<.5?-1:1,c=from.clone().lerp(to,.5).addScaledVector(side,sg*L*(.18+Math.random()*.17)).add(new THREE.Vector3(0,0,L*.12+Math.random()*4));
+ try{sfx.engine(dur)}catch(e){}
+ fly={from,c,tf:ctl.target.clone(),to:to.clone(),tt:tt.clone(),zf:cam.zoom,zt:z??cam.zoom,t0:performance.now(),dur:dur*1000,bank:sg*(.12+Math.random()*.1)};}
+const backOut=x=>{const c1=1.15,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2);};
 function goBack(){document.getElementById('card').style.display='none';sel=null;
- if(saved){startFly(saved.p,saved.t,1.1,saved.z);saved=null;}}
+ if(saved){startFly(saved.p,saved.t,undefined,saved.z);saved=null;}}
 addEventListener('keydown',e=>{if(e.key=='Escape'&&document.activeElement.id!='q')goBack();});
 // raycast
 const rc=new THREE.Raycaster(),mv=new THREE.Vector2();let down;
 cv.addEventListener('pointermove',e=>{if(e.pointerType!='mouse')return;mv.set(e.clientX/innerWidth*2-1,-e.clientY/innerHeight*2+1);rc.setFromCamera(mv,cam);const h=rc.intersectObject(mesh)[0];hov=h?h.instanceId:-1;cv.style.cursor=h?'pointer':'grab';});
-cv.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY];fly=null;});
+cv.addEventListener('pointerdown',e=>{down=[e.clientX,e.clientY];fly=null;cam.up.set(0,1,0);});
 cv.addEventListener('pointerup',e=>{if(Math.hypot(e.clientX-down[0],e.clientY-down[1])>6)return;
  mv.set(e.clientX/innerWidth*2-1,-e.clientY/innerHeight*2+1);rc.setFromCamera(mv,cam);const h=rc.intersectObject(mesh)[0];
  if(h){sfx.blip();const it=items[h.instanceId];if(it.no===sel){goBack();return;}card(it);flyTo([it.no]);}});
-cv.addEventListener('wheel',()=>{fly=null},{passive:true});
+cv.addEventListener('wheel',()=>{fly=null;cam.up.set(0,1,0);},{passive:true});
 // --- natural-ish search ---
 function parse(q){q=q.toLowerCase();const f=[];let m;
  if(m=q.match(/#\s*(\d+)/))return it=>it.no==+m[1];
@@ -216,14 +235,24 @@ function parse(q){q=q.toLowerCase();const f=[];let m;
  const words=q.replace(/[\d.<>#]+/g,' ').split(/\s+/).filter(w=>w.length>2&&!stop.has(w));
  if(words.length)f.push(it=>{const t=Object.values(it.traits).join(' ').toLowerCase();return words.every(w=>t.includes(w));});
  return it=>f.every(g=>g(it));}
+function setFb(n,q){const f=document.getElementById('sfb');f.className=n?'':'no';f.textContent=q?(n?`${n} RESULT${n==1?'':'S'}`:'NO RESULT'):'';}
 function search(){const q=document.getElementById('q').value.trim();const r=document.getElementById('res');
- if(!q){hl=null;r.style.display='none';chips();if(simple)renderList();return;}
- const fs=items.filter(parse(q)).filter(fOK).sort((a,b)=>(a.ask||9e15)-(b.ask||9e15)||a.rank-b.rank);hl=new Set(fs.map(i=>i.no));
- hl=new Set(items.filter(parse(q)).map(i=>i.no));chips();if(simple)renderList();r.style.display='block';r.innerHTML=`<b>${fs.length} result(s)</b><br>`+fs.slice(0,60).map(i=>`<div class="r" data-n="${i.no}">#${i.no} · ${i.tier} · rank ${i.rank} · ${i.sub} · ${i.ask?P(i.ask):'vaulted'}</div>`).join('');
+ if(!q){hl=null;r.style.display='none';setFb(0,'');chips();if(simple)renderList();return;}
+ const bare=q.match(/^#?\s*(\d{1,4})$/);
+ if(bare){const it=byNo.get(+bare[1]);hl=null;r.style.display='none';chips();if(!it){setFb(0,q);return;}setFb(1,q);card(it);flyTo([it.no]);return;}
+ document.getElementById('card').style.display='none';sel=null;
+ let fs=[];try{fs=items.filter(parse(q));}catch(e){console.warn('search parse',e);}
+ hl=new Set(fs.map(i=>i.no));fs=fs.filter(fOK).sort((a,b)=>(a.ask||9e15)-(b.ask||9e15)||a.rank-b.rank);
+ setFb(fs.length,q);chips();if(simple)renderList();
+ r.style.display='block';r.innerHTML=fs.length?`<b>${fs.length} result(s)</b><br>`+fs.slice(0,60).map(i=>`<div class="r" data-n="${i.no}">#${i.no} · ${i.tier} · rank ${i.rank} · ${i.sub} · ${i.ask?P(i.ask):'vaulted'}</div>`).join(''):'<b>No result</b><br><small>Try: 2109 · epic listed · sub1k under 0.002 btc</small>';
  r.querySelectorAll('.r').forEach(e=>e.onclick=()=>{const it=byNo.get(+e.dataset.n);card(it);flyTo([it.no]);});
- flyTo(fs.map(i=>i.no));}
-document.getElementById('go').onclick=search;document.getElementById('q').onkeydown=e=>e.key=='Enter'&&search();
-document.getElementById('reset').onclick=()=>{hl=null;FT.clear();FS.clear();FL=false;syncF();document.getElementById('q').value='';document.getElementById('res').style.display='none';(saved=null,sel=null,startFly(HOME,new THREE.Vector3(),1.2));};
+ if(fs.length)flyTo(fs.map(i=>i.no));}
+const qEl=document.getElementById('q');
+document.getElementById('sf').addEventListener('submit',e=>{e.preventDefault();qEl.blur();search();});
+qEl.addEventListener('keydown',e=>e.stopPropagation());
+qEl.addEventListener('search',()=>{if(!qEl.value)search();});
+document.querySelectorAll('.exq').forEach(x=>x.onclick=()=>{qEl.value=x.textContent;search();});
+document.getElementById('reset').onclick=()=>{hl=null;FT.clear();FS.clear();FL=false;FMAX=0;syncF();document.getElementById('q').value='';document.getElementById('res').style.display='none';(saved=null,sel=null,startFly(HOME,new THREE.Vector3()));};
 
 // --- procedural audio (Web Audio, no files) ---
 const AU={ctx:null,master:null,music:null,sfx:null,on:false,sfxOn:localStorage.getItem('vaultSfx')!=='0',timer:null,step:0,next:0};
@@ -259,6 +288,16 @@ const sfx={blip(){if(!AU.sfxOn)return;const C=ac();osc('square',880,C.currentTim
  whoosh(){if(!AU.sfxOn||!AU.ctx)return;const C=AU.ctx,t=C.currentTime,s=C.createBufferSource(),f=C.createBiquadFilter(),g=C.createGain();s.buffer=AU.noise;f.type='bandpass';f.Q.value=1.2;
   f.frequency.setValueAtTime(300,t);f.frequency.exponentialRampToValueAtTime(2200,t+.45);f.frequency.exponentialRampToValueAtTime(400,t+.9);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.12,t+.3);g.gain.exponentialRampToValueAtTime(.0001,t+.9);
   s.connect(f);f.connect(g);g.connect(AU.sfx);s.start(t);s.stop(t+1);},
+ engine(dur){if(!AU.sfxOn||!AU.ctx)return;const C=AU.ctx,t=C.currentTime,T=t+dur;
+  const o=C.createOscillator(),o2=C.createOscillator(),f=C.createBiquadFilter(),g=C.createGain();o.type='sawtooth';o2.type='sawtooth';o2.detune.value=14;
+  o.frequency.setValueAtTime(55,t);o.frequency.exponentialRampToValueAtTime(150,t+dur*.55);o.frequency.exponentialRampToValueAtTime(60,T);o2.frequency.setValueAtTime(55.5,t);o2.frequency.exponentialRampToValueAtTime(152,t+dur*.55);o2.frequency.exponentialRampToValueAtTime(61,T);
+  f.type='lowpass';f.Q.value=4;f.frequency.setValueAtTime(250,t);f.frequency.exponentialRampToValueAtTime(1400,t+dur*.55);f.frequency.exponentialRampToValueAtTime(300,T);
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.07,t+.25);g.gain.setValueAtTime(.07,t+dur*.6);g.gain.exponentialRampToValueAtTime(.0001,T+.1);
+  o.connect(f);o2.connect(f);f.connect(g);g.connect(AU.sfx);o.start(t);o2.start(t);o.stop(T+.2);o2.stop(T+.2);
+  const n=C.createBufferSource(),nf=C.createBiquadFilter(),ng=C.createGain();n.buffer=AU.noise;n.loop=true;nf.type='bandpass';nf.Q.value=.8;nf.frequency.setValueAtTime(400,t);nf.frequency.exponentialRampToValueAtTime(1800,t+dur*.6);nf.frequency.exponentialRampToValueAtTime(500,T);
+  ng.gain.setValueAtTime(.0001,t);ng.gain.exponentialRampToValueAtTime(.04,t+dur*.5);ng.gain.exponentialRampToValueAtTime(.0001,T);n.connect(nf);nf.connect(ng);ng.connect(AU.sfx);n.start(t);n.stop(T+.1);
+  const w=C.createBufferSource(),wf=C.createBiquadFilter(),wg=C.createGain();w.buffer=AU.noise;wf.type='bandpass';wf.Q.value=2;wf.frequency.setValueAtTime(3000,T-.35);wf.frequency.exponentialRampToValueAtTime(600,T+.15);
+  wg.gain.setValueAtTime(.0001,T-.35);wg.gain.exponentialRampToValueAtTime(.09,T-.12);wg.gain.exponentialRampToValueAtTime(.0001,T+.2);w.connect(wf);wf.connect(wg);wg.connect(AU.sfx);w.start(T-.35);w.stop(T+.3);},
  clink(d=0){if(!AU.sfxOn)return;const C=ac(),t=C.currentTime+d;[2637,3520,4186].forEach((f,i)=>osc('sine',f*(1+Math.random()*.02),t+i*.012,.18,.035,AU.sfx));}};
 document.getElementById('music').onclick=()=>setMusic(!AU.on);document.getElementById('sfx').onclick=()=>setSfx(!AU.sfxOn);setSfx(AU.sfxOn);
 document.addEventListener('click',e=>{if(e.target.closest('button,.chip,.r,#prize'))sfx.blip();},true);
@@ -270,22 +309,33 @@ function chips(){const tiers=['Legendary','Epic','Rare','Uncommon','Common'],sub
  const ch=(g,v,lab,sw)=>{const [n,l]=cnt(g=='t'?i=>i.tier==v:i=>i.sub==v);const on=(g=='t'?FT:FS).has(v);
   return `<span class="chip${on?' on':''}" data-g="${g}" data-v="${v}">${sw?`<i style="background:#${sw.toString(16).padStart(6,'0')}"></i>`:''}${lab} <em>${n} · ${l} listed</em></span>`;};
  const m=items.filter(act).length;
- document.getElementById('chips').innerHTML=`<div class="cg">TIER</div>${tiers.map(t=>ch('t',t,t,TC[t])).join('')}
+ const html=`<div class="cg">TIER</div>${tiers.map(t=>ch('t',t,t,TC[t])).join('')}
  <div class="cg">SHIELDED #</div>${subs.map(x=>ch('s',x,x)).join('')}
  <div class="cg">OPTIONS</div><span class="chip${FL?' on':''}" data-g="l">Listed only</span>${fOn()?'<span class="chip clr" data-g="c">✕ Clear filters</span>':''}
  <div id="fcount">${anyF()?`<b>${m}</b> matching locker${m==1?'':'s'}${hl?' (with search)':''}`:'Tap chips to filter · tier AND Shielded #'}</div>`;
- document.querySelectorAll('#chips .chip').forEach(c=>c.onclick=()=>{const g=c.dataset.g,v=c.dataset.v;
-  if(g=='t')FT.has(v)?FT.delete(v):FT.add(v);else if(g=='s')FS.has(v)?FS.delete(v):FS.add(v);else if(g=='l')FL=!FL;else{FT.clear();FS.clear();FL=false;}
+ document.getElementById('chips').innerHTML=html;
+ const dc=document.getElementById('dchips');if(dc){dc.innerHTML=html.replace('<div id="fcount">','<div class="cg">MAX PRICE</div><input id="fmax" type="number" step="0.0001" min="0" placeholder="BTC" value="'+(FMAX||'')+'"> <span id="fcount2">').replace(/<\/div>$/,'</span>');
+  const fm=document.getElementById('fmax');fm.onchange=fm.onkeydown=e=>{if(e.type=='keydown'&&e.key!='Enter')return;FMAX=+fm.value||0;syncF();};}
+ document.querySelectorAll('#chips .chip,#dchips .chip').forEach(c=>c.onclick=()=>{const g=c.dataset.g,v=c.dataset.v;
+  if(g=='t')FT.has(v)?FT.delete(v):FT.add(v);else if(g=='s')FS.has(v)?FS.delete(v):FS.add(v);else if(g=='l')FL=!FL;else{FT.clear();FS.clear();FL=false;FMAX=0;}
   syncF();});}
 function syncF(){const u=new URL(location.href);const set=(k,v)=>v?u.searchParams.set(k,v):u.searchParams.delete(k);
- set('tier',[...FT].map(t=>t.toLowerCase()).join(','));set('sub',[...FS].join(','));set('listed',FL?'1':'');
+ set('tier',[...FT].map(t=>t.toLowerCase()).join(','));set('sub',[...FS].join(','));set('listed',FL?'1':'');set('max',FMAX?String(FMAX):'');
  history.replaceState(null,'',u.toString().replace(/%2C/g,','));chips();if(simple)renderList();}
-// --- simple mode ---
+// --- BEST DEALS mode ---
 let simple=false;document.getElementById('simple').onclick=()=>{simple=!simple;document.getElementById('list').style.display=simple?'block':'none';if(simple)renderList();};
-function renderList(){const L=document.getElementById('list');const src=anyF()?items.filter(act):items.filter(i=>i.ask);
- const dl=i=>i.ask?i.ask/i.fair:9e9;src.sort((a,b)=>dl(a)-dl(b)||a.rank-b.rank);
- L.innerHTML=`<b>${anyF()?src.length+' filtered Nakas':'Listed Nakas'} — best deal first</b><table><tr><th>#</th><th>Tier</th><th>Rank</th><th>Shielded #</th><th>Price</th><th>Fair value</th><th>Deal</th></tr>`+
- src.map(i=>`<tr><td>${i.no}</td><td>${i.tier}</td><td>${i.rank}</td><td>${i.num} (${i.sub})</td><td>${P(i.ask)}</td><td>${P(i.fair)}</td><td class="${i.snipe?'snipe':''}">${i.ask?Math.round((1-i.ask/i.fair)*100)+'%':''}</td></tr>`).join('')+'</table>';}
+function renderList(){const L=document.getElementById('list');
+ const src=items.filter(i=>i.ask&&act(i));src.sort((a,b)=>a.ask/a.fair-b.ask/b.fair||a.rank-b.rank);
+ L.innerHTML=`<div class="dh"><h2>BEST DEALS</h2><span>${src.length} listed Naka${src.length==1?'':'s'} · ranked by discount vs est. fair value${hl?` · <b>search “${qEl.value}” active</b> <button class="dark" id="dclr" style="font-size:12px;padding:1px 6px">✕ clear search</button>`:''}</span><button class="dark" id="dclose">✕ Back to vault</button></div>
+ <div id="dchips"></div><div id="dl">`+(src.length?'':'<p>No listed Naka matches these filters.</p>')+
+ src.slice(0,150).map((i,n)=>{const d=Math.round((1-i.ask/i.fair)*100);return `<div class="deal"><div class="rk">${n+1}</div><img loading="lazy" src="${img(i)}" alt="">
+ <div><div class="t">NAKAS #${i.no} · ${i.tier} · ${i.sub}</div><div class="m">Rank ${i.rank} · Shielded # ${i.num}</div>
+ <div class="m"><b>Ask ${P(i.ask)}</b> · Fair ${P(i.fair)}</div></div>
+ <div class="act"><span class="pc${d>=15?' hot':''}">${d>=0?d+'% UNDER':(-d)+'% OVER'}</span><button data-v="${i.no}">View in vault</button><a target="_blank" href="https://ord-dropz.xyz">Ord Dropz ↗</a></div></div>`}).join('')+'</div>';
+ chips();
+ const dc_=document.getElementById('dclr');if(dc_)dc_.onclick=()=>{qEl.value='';search();};
+ document.getElementById('dclose').onclick=()=>document.getElementById('simple').click();
+ L.querySelectorAll('button[data-v]').forEach(b=>b.onclick=()=>{const it=byNo.get(+b.dataset.v);document.getElementById('simple').click();card(it);flyTo([it.no]);});}
 // --- $SHNAKAS simulator (relative estimate) ---
 document.getElementById('simBtn').onclick=()=>document.getElementById('sim').classList.toggle('show');
 const coins=[];
@@ -320,6 +370,37 @@ if(pk>=0){ring=new THREE.Mesh(new THREE.TorusGeometry(1,.09,8,32),new THREE.Mesh
 document.getElementById('prize').onclick=()=>{const it=byNo.get(PRIZE);if(it){card(it);flyTo([PRIZE]);}};
 document.getElementById('lLive').innerHTML=`LIVE · Floor <b>${P(D.floor)}</b> · ${D.listed} listed · 24h vol <b>${P(D.vol24)}</b>`;
 chips();
+// --- market panel (2.5D poster chart) ---
+function market(){const M=document.getElementById('mkt'),ser=D.series.slice(-14).map(x=>({...x,floor:x.floorSrc=='lowsale'?x.med:x.floor}));if(!ser.length){M.style.display='none';return;}
+ const W=316,H=130,VH=40,pl=36,pr=6,pt=8,iw=W-pl-pr,n=ser.length,fx=i=>pl+(n==1?iw/2:i*iw/(n-1));
+ const fs=ser.map(s=>s.floor),lo=Math.min(...fs)*.9,hi=Math.max(...fs)*1.08,fy=v=>pt+(1-(v-lo)/(hi-lo))*(H-pt-14);
+ const vm=Math.max(...ser.map(s=>s.vol))||1,bw=Math.max(4,iw/n*.6);
+ const line=ser.map((s,i)=>`${i?'L':'M'}${fx(i).toFixed(1)},${fy(s.floor).toFixed(1)}`).join(''),area=line+`L${fx(n-1)},${H-14}L${fx(0)},${H-14}Z`;
+ const yt=[lo,(lo+hi)/2,hi].map(v=>`<line x1="${pl}" x2="${W-pr}" y1="${fy(v)}" y2="${fy(v)}" stroke="#3a3128" stroke-dasharray="2 3"/><text x="2" y="${fy(v)+3}">${(v/1e8).toFixed(4)}</text>`).join('');
+ const xt=ser.map((s,i)=>(i%Math.ceil(n/5)==0||i==n-1)?`<text x="${fx(i)}" y="${H-3}" text-anchor="middle">${s.d.slice(5)}</text>`:'').join('');
+ const bars=ser.map((s,i)=>{const h=Math.max(1,s.vol/vm*(VH-12));return `<rect x="${fx(i)-bw/2}" y="${VH-h}" width="${bw}" height="${h}" fill="${i==n-1?'#d81e1e':'#f3ead6'}" stroke="#000"/><rect x="${fx(i)-bw/2+3}" y="${VH-h-3}" width="${bw}" height="${h}" fill="#000" opacity=".35" style="mix-blend-mode:multiply"/>`}).join('');
+ const hits=ser.map((s,i)=>`<rect class="hit" data-i="${i}" x="${fx(i)-iw/n/2}" y="0" width="${iw/n}" height="${H}"/>`).join('');
+ const dots=ser.map((s,i)=>`<circle cx="${fx(i)}" cy="${fy(s.floor)}" r="${i==n-1?4.5:2.5}" fill="${i==n-1?'#d81e1e':'#f26a1b'}" stroke="#000"/>`).join('');
+ const ch=D.floor24hAgo?((D.floor-D.floor24hAgo)/D.floor24hAgo*100):null;
+ const r=D.rsi??50,ang=Math.PI*(1-r/100),nx=60+44*Math.cos(ang),ny=56-44*Math.sin(ang);
+ const arc=(a0,a1,c)=>{const p=a=>[60+44*Math.cos(Math.PI*(1-a/100)),56-44*Math.sin(Math.PI*(1-a/100))];const [x0,y0]=p(a0),[x1,y1]=p(a1);return `<path d="M${x0},${y0}A44,44 0 0 1 ${x1},${y1}" stroke="${c}" stroke-width="12" fill="none"/>`;};
+ M.innerHTML=`<h3><span>MARKET · 14D</span><button class="dark" id="mkMin" style="font-size:12px;padding:1px 7px">–</button></h3><div class="body">
+ <div class="lab">FLOOR NOW</div><div class="row"><span class="big">${btc(D.floor)}</span>${ch!=null?`<span class="ch ${ch>=0?'up':'dn'}">${ch>=0?'▲':'▼'} ${Math.abs(ch).toFixed(1)}% 24H</span>`:''}</div><small>${usd(D.floor).replace(/[()]/g,'')}</small>
+ <div class="lab">FLOOR PRICE · BTC</div>
+ <svg viewBox="0 0 ${W} ${H}" width="100%"><defs><filter id="gl"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <linearGradient id="ar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f26a1b" stop-opacity=".55"/><stop offset="1" stop-color="#f26a1b" stop-opacity="0"/></linearGradient></defs>
+ ${yt}<path d="${area}" fill="url(#ar)"/><path d="${line}" transform="translate(3,3)" stroke="#000" stroke-width="3" fill="none"/><path d="${line}" stroke="#f26a1b" stroke-width="3" fill="none" filter="url(#gl)"/>${dots}${xt}${hits}</svg>
+ <div class="lab">VOLUME / DAY · BTC</div><svg viewBox="0 0 ${W} ${VH+2}" width="100%"><text x="2" y="10">${(vm/1e8).toFixed(3)}</text>${bars}${hits.replace(/height="${H}"/g,'height="'+VH+'"')}</svg>
+ <div class="lab">RSI 14 · MOMENTUM</div><div class="row"><svg viewBox="-6 0 132 70" width="140">${arc(0,30,'#2bd46a')}${arc(30,70,'#f3ead6')}${arc(70,100,'#d81e1e')}
+ <line x1="60" y1="56" x2="${nx}" y2="${ny}" stroke="#000" stroke-width="5"/><line x1="60" y1="56" x2="${nx}" y2="${ny}" stroke="#f26a1b" stroke-width="3"/><circle cx="60" cy="56" r="5" fill="#f26a1b" stroke="#000"/>
+ <text x="-4" y="68" style="font-size:8px">OVERSOLD</text><text x="124" y="68" text-anchor="end" style="font-size:8px">OVERBOUGHT</text></svg>
+ <div><span class="big" style="font-size:28px">${D.rsi??'—'}</span><br><b style="font:16px Anton;color:${r<30?'#2bd46a':r>70?'#ff4d4d':'#f3ead6'}">${r<30?'OVERSOLD':r>70?'OVERBOUGHT':'NEUTRAL'}</b><br><small>&lt;30 oversold · &gt;70 overbought</small></div></div>
+ <small>Floor = lowest live ask (median sale on days before tracking). Hover the chart for details.</small></div>`;
+ const tip=document.getElementById('tip');
+ M.querySelectorAll('.hit').forEach(h=>{h.onmousemove=e=>{const s=ser[+h.dataset.i];tip.style.display='block';tip.style.left=(e.clientX-180)+'px';tip.style.top=(e.clientY+14)+'px';
+  tip.innerHTML=`<b>${s.d}</b><br>Floor ${P(s.floor)}${s.floorSrc=='lowsale'?' <small>(median sale, pre-tracking)</small>':''}<br>Volume ${P(s.vol)} · ${s.n} sales<br>Median sale ${P(s.med)}`;};h.onmouseleave=()=>tip.style.display='none';});
+ document.getElementById('mkMin').onclick=()=>M.classList.toggle('min');}
+market();
 const clk=new THREE.Clock();paint();
 document.getElementById('perf').textContent=LOW?'LITE MODE · bloom off':'BLOOM ON · add ?lite for low-end';
 const sp=new URLSearchParams(location.search);
@@ -327,8 +408,12 @@ const enter=()=>{document.getElementById('land').classList.add('gone');document.
  if(!sp.has('noIntro'))startFly(HOME,new THREE.Vector3(),2.4);else cam.position.copy(HOME);};
 document.getElementById('enter').onclick=enter;if(sp.has('enter')||sp.get('sim')||sp.get('open')||sp.get('q'))enter();
 (function loop(){const t=clk.getElapsedTime();if(Math.floor(t*30)%2==0)paint(t);
- if(fly){const k=Math.min(1,(performance.now()-fly.t0)/fly.dur),e=ease(k);cam.position.lerpVectors(fly.from,fly.to,e);ctl.target.lerpVectors(fly.tf,fly.tt,e);cam.zoom=fly.zf+(fly.zt-fly.zf)*e;cam.updateProjectionMatrix();if(k>=1)fly=null;}
- red.intensity=80+25*Math.sin(t*3);tower.rotation.y=Math.sin(t*.3)*.3;
+ if(fly){const k=Math.min(1,(performance.now()-fly.t0)/fly.dur),e=ease(k),b=backOut(Math.min(1,k*1.0)),u=b,v=1-u;
+  cam.position.set(0,0,0).addScaledVector(fly.from,v*v).addScaledVector(fly.c,2*v*u).addScaledVector(fly.to,u*u);
+  ctl.target.lerpVectors(fly.tf,fly.tt,e);cam.zoom=fly.zf+(fly.zt-fly.zf)*e;cam.updateProjectionMatrix();
+  const roll=fly.bank*Math.sin(Math.PI*k);cam.up.set(Math.sin(roll),Math.cos(roll),0);
+  if(k>=1){fly=null;cam.up.set(0,1,0);}}
+ red.intensity=80+25*Math.sin(t*3);
  for(let i=coins.length-1;i>=0;i--){const c=coins[i];c.userData.v=Math.min(.04,c.userData.v+.004);c.position.y=Math.max(c.userData.y0+.2,c.position.y-c.userData.v);if(performance.now()-c.userData.born>1400){S.remove(c);coins.splice(i,1);}}
  grid.position.z=(t*6)%4;stars.rotation.z=t*.004;sun.material.opacity=.15+.05*Math.sin(t);cy.intensity=60+20*Math.sin(t*2.3);
  if(ring){ring.rotation.z=t*1.5;ring.scale.setScalar(1+.15*Math.sin(t*4));}

@@ -104,9 +104,24 @@ def main():
     listed = [r for r in rows if r["ask"]]
     snipes = sorted([r for r in listed if r["snipe"]], key=lambda r: r["ask"] / r["fair"])
     best = (snipes or sorted(listed, key=lambda r: r["ask"] / r["fair"]))[:1]
+    # floor history (repo data/floor_history.csv written by the pages workflow), daily close + 24h-ago value
+    fh = {}; ago = None
+    for hp_ in (ROOT.parent / "data" / "floor_history.csv", ROOT / "out" / "floor_history.csv"):
+        if hp_.exists():
+            for r in csv.DictReader(hp_.open()):
+                try: v = int(float(r["floor_all"])); ts = r["ts_utc"]
+                except Exception: continue
+                fh[ts[:10]] = v
+                if ts <= (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat(): ago = v
+            break
+    for s_ in series:
+        s_["floor"] = fh.get(s_["d"]); s_["floorSrc"] = "ask" if s_["d"] in fh else "lowsale"
+        if s_["floor"] is None: s_["floor"] = s_["lo"]
+    if series: series[-1]["floor"] = floor; series[-1]["floorSrc"] = "ask"
+    if ago is None and len(series) > 1: ago = series[-2]["floor"]
     data = {"generatedAt": datetime.now(timezone.utc).isoformat(), "btcUsd": usd, "floor": floor,
             "floor2": asks[1] if len(asks) > 1 else None, "listed": len(listed), "total": len(rows),
-            "vol24": vol24, "sales24": n24, "rsi": rsi(hp), "series": series[-30:], "lastSales": last_sales,
+            "vol24": vol24, "floor24hAgo": ago, "sales24": n24, "rsi": rsi(hp), "series": series[-30:], "lastSales": last_sales,
             "nakaOfDay": best[0]["no"] if best else None, "subBonus": SUB_BONUS,
             "source": "Ord Dropz Shielded public API (/listings) + secondary market trades", "items": rows}
     (OUT / "data.json").write_text(json.dumps(data, separators=(",", ":")))
