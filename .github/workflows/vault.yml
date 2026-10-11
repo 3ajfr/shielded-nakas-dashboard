@@ -7,7 +7,7 @@ on:
     - cron: "15,45 * * * *"   # every 30 min = 48 API units/day
   workflow_dispatch:
   push:
-    branches: [vault-3d]
+    branches: [main]
     paths: ["vault_build/**", "vault/index.html", ".github/workflows/vault.yml"]
 
 permissions:
@@ -41,5 +41,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add vault/data.json
           git diff --cached --quiet && exit 0
-          git commit -m "chore: refresh vault data [skip ci]"
+          git commit -m "chore: refresh vault data"
+          git pull --rebase origin ${GITHUB_REF_NAME} || true
           git push origin HEAD:${GITHUB_REF_NAME}

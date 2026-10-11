@@ -59,6 +59,12 @@ jobs:
             git push origin HEAD:main
           }
 
+      - name: Include The Vault
+        run: |
+          mkdir -p site/vault
+          cp -r vault/. site/vault/
+          rm -f site/vault/*.png
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:
