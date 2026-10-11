@@ -93,7 +93,7 @@ def main():
     series = [{"d": d, "med": int(statistics.median(v)), "lo": min(v), "hi": max(v), "vol": sum(v), "n": len(v)}
               for d, v in sorted(daily.items())]
     hourly = {}
-    for t in trades[-600:]:
+    for t in trades:
         hourly.setdefault((t.get("completedAt") or t["createdAt"])[:13], []).append(t["salePrice"])
     hp = [int(statistics.median(v)) for _, v in sorted(hourly.items())]
     since = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
@@ -117,11 +117,29 @@ def main():
     for s_ in series:
         s_["floor"] = fh.get(s_["d"]); s_["floorSrc"] = "ask" if s_["d"] in fh else "lowsale"
         if s_["floor"] is None: s_["floor"] = s_["lo"]
+    # hourly buckets for last 48h (trades + floor_history hourly close)
+    fhh = {}
+    for hp_ in (ROOT.parent / "data" / "floor_history.csv", ROOT / "out" / "floor_history.csv"):
+        if hp_.exists():
+            for r in csv.DictReader(hp_.open()):
+                try: fhh[r["ts_utc"][:13]] = int(float(r["floor_all"]))
+                except Exception: pass
+            break
+    now_ = datetime.now(timezone.utc); hourly_s = []; last_f = None
+    for h in range(47, -1, -1):
+        key = (now_ - timedelta(hours=h)).strftime("%Y-%m-%dT%H")
+        v = hourly.get(key) or []
+        if key in fhh: last_f = fhh[key]
+        hourly_s.append({"d": key + ":00Z", "med": int(statistics.median(v)) if v else None, "lo": min(v) if v else None,
+                         "vol": sum(v), "n": len(v), "floor": fhh.get(key) or last_f, "floorSrc": "ask" if key in fhh else ("carry" if last_f else "lowsale")})
+    for x in hourly_s:
+        if x["floor"] is None: x["floor"] = x["med"]
+    if hourly_s: hourly_s[-1]["floor"] = floor; hourly_s[-1]["floorSrc"] = "ask"
     if series: series[-1]["floor"] = floor; series[-1]["floorSrc"] = "ask"
     if ago is None and len(series) > 1: ago = series[-2]["floor"]
     data = {"generatedAt": datetime.now(timezone.utc).isoformat(), "btcUsd": usd, "floor": floor,
             "floor2": asks[1] if len(asks) > 1 else None, "listed": len(listed), "total": len(rows),
-            "vol24": vol24, "floor24hAgo": ago, "sales24": n24, "rsi": rsi(hp), "series": series[-30:], "lastSales": last_sales,
+            "vol24": vol24, "floor24hAgo": ago, "sales24": n24, "rsi": rsi(hp), "series": series, "hourly": hourly_s, "lastSales": last_sales,
             "nakaOfDay": best[0]["no"] if best else None, "subBonus": SUB_BONUS,
             "source": "Ord Dropz Shielded public API (/listings) + secondary market trades", "items": rows}
     (OUT / "data.json").write_text(json.dumps(data, separators=(",", ":")))

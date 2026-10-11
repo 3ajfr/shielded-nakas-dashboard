@@ -33,6 +33,7 @@ button.dark{background:var(--cr)}
 #mkt .row{display:flex;gap:10px;align-items:center}#mkt small{font-size:10px}
 #tip{position:fixed;z-index:30;pointer-events:none;background:#000;color:var(--cr);border:2px solid var(--o);padding:5px 8px;font-size:12px;display:none;box-shadow:3px 3px 0 var(--o)}
 #mkt.min .body{display:none}
+.tfb{display:flex;margin:6px 0 2px;border:2px solid #000;box-shadow:3px 3px 0 #000;width:max-content}.tf{font:14px Anton,sans-serif;letter-spacing:.04em;padding:3px 10px;background:var(--cr);color:#000;cursor:pointer;border-right:2px solid #000}.tf:last-child{border-right:0}.tf:hover{background:#ffd2b3}.tf.on{background:var(--o)}
 #card{z-index:8}
 #list{background:var(--k);color:var(--cr);border:3px solid var(--o)}
 #list .dh{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}#list .dh h2{margin:0;font:40px Anton,sans-serif;color:var(--o);text-shadow:3px 3px 0 #000}
@@ -59,7 +60,8 @@ button.dark{background:var(--cr)}
 .ttl{font:24px Anton,sans-serif;background:#000;color:#fff;padding:2px 10px;display:inline-block;transform:rotate(-1.5deg)}
 .spark{position:fixed;width:7px;height:7px;pointer-events:none;z-index:9;animation:sp .9s ease-out forwards}
 @keyframes sp{to{transform:translate(var(--x),var(--y)) rotate(200deg) scale(0);opacity:0}}
-#sim{left:10px;bottom:10px;width:300px;font-size:13px}#sim input{width:90px;padding:6px;background:var(--k);color:#fff;border:2px solid var(--cr);border-radius:3px}
+#sim{left:10px;bottom:10px;width:320px;font-size:13px;display:none;z-index:9;max-height:calc(100vh - 80px);overflow:auto}#sim.show{display:block;animation:pin .4s cubic-bezier(.2,1.4,.4,1) both}
+#sim .sx{float:right;font-size:12px;padding:1px 7px}#simGo{font-size:20px;padding:6px 16px}#sim input{font-size:18px!important;width:110px!important}#sim input{width:90px;padding:6px;background:var(--k);color:#fff;border:2px solid var(--cr);border-radius:3px}
 .simres{background:var(--cr);color:#000;border:2px solid #000;margin-top:10px;padding:10px}.simres .sh{font:16px Anton,sans-serif;letter-spacing:.03em}
 .simres .g{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.simres .g div{background:#fff;border:2px solid #000;padding:6px}.simres .g .w{grid-column:1/3}
 .simres span{display:block;font-size:12px;font-weight:700;color:#333}.simres b{font:30px Anton,sans-serif;color:#000}.simres p{margin:4px 0;font-size:13px}.simres .n{font-size:11px;color:#444}
@@ -93,7 +95,7 @@ button.dark{background:var(--cr)}
  clip-path:polygon(0 8%,4% 0,9% 6%,15% 1%,22% 7%,30% 0,38% 6%,47% 1%,55% 7%,63% 0,71% 6%,79% 1%,87% 7%,94% 0,100% 5%,100% 100%,0 100%)}
 #land .steps i{font-style:normal;color:var(--o)}#land .steps .url{margin-left:auto;font:16px SG;font-weight:700}
 @media(max-width:800px){#land{grid-template-columns:1fr;grid-template-rows:auto 1fr auto;overflow:auto}#land .L{clip-path:none;padding:50px 20px 16px}#land .L img{width:46vw}#land .steps{grid-column:1}
- #stats{width:auto;right:10px;font-size:12px;top:116px}#prize{left:auto;right:10px;top:auto;bottom:70px}#card{left:10px;right:10px;width:auto;top:auto;bottom:10px}#sim{display:none}#sim.show{display:block}}
+ #stats{width:auto;right:10px;font-size:12px;top:116px}#prize{left:auto;right:10px;top:auto;bottom:70px}#card{left:10px;right:10px;width:auto;top:auto;bottom:10px}#sim.show{left:10px;right:10px;width:auto}}
 </style></head><body class="landing">
 <canvas id="c"></canvas><div id="fx"></div><div id="grain"></div><div id="perf"></div><div id="ver" class="hud"></div>
 <div id="land"><div id="lver" class="stk"></div><div class="L"><span class="stk">THE PRIZE</span><img id="pImg" alt="Shielded Nakas #1052"><div class="cap">SHIELDED NAKAS #1052 · RED HOODIE</div></div>
@@ -109,7 +111,7 @@ button.dark{background:var(--cr)}
 <div id="stats" class="hud panel"></div><div id="mkt" class="hud panel"></div>
 <div id="card" class="hud"><div id="cardIn" class="panel"></div></div>
 <div id="res" class="hud panel"></div>
-<div id="sim" class="hud panel"><b>🪙 $SHNAKAS rewards simulator</b><br><small>Estimate only — not official numbers.</small><br>
+<div id="sim" class="hud panel"><button class="dark sx" id="simX">✕</button><b>🪙 $SHNAKAS rewards simulator</b><br><small>Estimate only — not official numbers.</small><br>
 Naka # <input id="simN" type="number" min="1" max="3327" placeholder="2109"> <button id="simGo">Simulate</button><div id="simOut"></div></div>
 <div id="list" class="panel"></div><div id="tip"></div>
 <script type="module">
@@ -118,7 +120,7 @@ import {OrbitControls} from './OrbitControls.js';
 import {EffectComposer} from './jsm/postprocessing/EffectComposer.js';import {RenderPass} from './jsm/postprocessing/RenderPass.js';
 import {UnrealBloomPass} from './jsm/postprocessing/UnrealBloomPass.js';import {OutputPass} from './jsm/postprocessing/OutputPass.js';
 import {RoomEnvironment} from './jsm/environments/RoomEnvironment.js';
-const VERSION='v0.4'; // bump on each release
+const VERSION='v0.5'; // bump on each release
 const D = await (await fetch('data.json?'+Date.now())).json();
 const U = D.btcUsd||0, items = D.items, byNo = new Map(items.map(i=>[i.no,i]));
 const btc = s => s==null?'—':(s/1e8).toFixed(s<1e6?5:4)+' BTC';
@@ -303,7 +305,7 @@ const sfx={blip(){if(!AU.sfxOn)return;const C=ac();osc('square',880,C.currentTim
   wg.gain.setValueAtTime(.0001,T-.35);wg.gain.exponentialRampToValueAtTime(.09,T-.12);wg.gain.exponentialRampToValueAtTime(.0001,T+.2);w.connect(wf);wf.connect(wg);wg.connect(AU.sfx);w.start(T-.35);w.stop(T+.3);},
  clink(d=0){if(!AU.sfxOn)return;const C=ac(),t=C.currentTime+d;[2637,3520,4186].forEach((f,i)=>osc('sine',f*(1+Math.random()*.02),t+i*.012,.18,.035,AU.sfx));}};
 document.getElementById('music').onclick=()=>setMusic(!AU.on);document.getElementById('sfx').onclick=()=>setSfx(!AU.sfxOn);setSfx(AU.sfxOn);
-document.addEventListener('click',e=>{if(e.target.closest('button,.chip,.r,#prize'))sfx.blip();},true);
+document.addEventListener('click',e=>{if(e.target.closest('button,.chip,.r,#prize,.tf,.exq'))sfx.blip();},true);
 // music starts OFF until a user click; if previously ON, resume on first interaction
 if(localStorage.getItem('vaultMusic')=='1')document.addEventListener('pointerdown',()=>{if(!AU.on)setMusic(true)},{once:true});
 // --- filter chips ---
@@ -340,7 +342,11 @@ function renderList(){const L=document.getElementById('list');
  document.getElementById('dclose').onclick=()=>document.getElementById('simple').click();
  L.querySelectorAll('button[data-v]').forEach(b=>b.onclick=()=>{const it=byNo.get(+b.dataset.v);document.getElementById('simple').click();card(it);flyTo([it.no]);});}
 // --- $SHNAKAS simulator (relative estimate) ---
-document.getElementById('simBtn').onclick=()=>document.getElementById('sim').classList.toggle('show');
+function openSim(n){const el=document.getElementById('sim'),inp=document.getElementById('simN');el.classList.add('show');
+ if(n)inp.value=n;else if(!inp.value)inp.value=sel||2109;setTimeout(()=>{inp.focus();inp.select();},50);}
+document.getElementById('simBtn').onclick=()=>{const el=document.getElementById('sim');el.classList.contains('show')?el.classList.remove('show'):openSim();};
+document.getElementById('simX').onclick=()=>document.getElementById('sim').classList.remove('show');
+document.getElementById('simN').addEventListener('keydown',e=>{e.stopPropagation();if(e.key=='Enter')document.getElementById('simGo').click();});
 const coins=[];
 document.getElementById('simGo').onclick=()=>{const it=byNo.get(+document.getElementById('simN').value);const o=document.getElementById('simOut');
  if(!it){o.innerHTML='Unknown #';return;}const b=D.subBonus[it.sub]||0, w=1+b;
@@ -374,34 +380,45 @@ document.getElementById('prize').onclick=()=>{const it=byNo.get(PRIZE);if(it){ca
 document.getElementById('lLive').innerHTML=`LIVE · Floor <b>${P(D.floor)}</b> · ${D.listed} listed · 24h vol <b>${P(D.vol24)}</b>`;
 chips();
 // --- market panel (2.5D poster chart) ---
-function market(){const M=document.getElementById('mkt'),ser=D.series.slice(-14).map(x=>({...x,floor:x.floorSrc=='lowsale'?x.med:x.floor}));if(!ser.length){M.style.display='none';return;}
+const TFS={'24h':['24H',24],'7d':['7D',7],'14d':['14D',14],'1m':['1M',30],'all':['ALL',0]};
+let TF=(new URLSearchParams(location.search).get('tf')||localStorage.getItem('vaultTf')||'14d').toLowerCase();if(!TFS[TF])TF='14d';
+function rsiOf(v,n=14){if(v.length<=n)return null;let g=0,l=0;for(let i=1;i<=n;i++){const d=v[i]-v[i-1];d>0?g+=d:l-=d;}g/=n;l/=n;
+ for(let i=n+1;i<v.length;i++){const d=v[i]-v[i-1];g=(g*(n-1)+Math.max(d,0))/n;l=(l*(n-1)+Math.max(-d,0))/n;}return l==0?100:Math.round((100-100/(1+g/l))*10)/10;}
+function setTf(t){TF=t;localStorage.setItem('vaultTf',t);const u=new URL(location.href);u.searchParams.set('tf',t);history.replaceState(null,'',u.toString().replace(/%2C/g,','));market();}
+function market(){const M=document.getElementById('mkt'),hr=TF=='24h',src=hr?(D.hourly||[]).slice(-24):(TFS[TF][1]?D.series.slice(-TFS[TF][1]):D.series);
+ const ser=src.map(x=>({...x,floor:(x.floorSrc=='lowsale'||x.floor==null)?x.med:x.floor})).filter(x=>x.floor!=null);
+ const tfbar=`<div class="tfb">${Object.entries(TFS).map(([k,[l]])=>`<span class="tf${k==TF?' on':''}" data-tf="${k}">${l}</span>`).join('')}</div>`;
+ if(ser.length<2){M.innerHTML=`<h3><span>MARKET</span></h3>${tfbar}<p>Not enough data for this timeframe.</p>`;M.querySelectorAll('.tf').forEach(x=>x.onclick=()=>setTf(x.dataset.tf));return;}
+ const RS=rsiOf(ser.map(s=>s.floor));
  const W=316,H=130,VH=40,pl=36,pr=6,pt=8,iw=W-pl-pr,n=ser.length,fx=i=>pl+(n==1?iw/2:i*iw/(n-1));
  const fs=ser.map(s=>s.floor),lo=Math.min(...fs)*.9,hi=Math.max(...fs)*1.08,fy=v=>pt+(1-(v-lo)/(hi-lo))*(H-pt-14);
  const vm=Math.max(...ser.map(s=>s.vol))||1,bw=Math.max(4,iw/n*.6);
  const line=ser.map((s,i)=>`${i?'L':'M'}${fx(i).toFixed(1)},${fy(s.floor).toFixed(1)}`).join(''),area=line+`L${fx(n-1)},${H-14}L${fx(0)},${H-14}Z`;
  const yt=[lo,(lo+hi)/2,hi].map(v=>`<line x1="${pl}" x2="${W-pr}" y1="${fy(v)}" y2="${fy(v)}" stroke="#3a3128" stroke-dasharray="2 3"/><text x="2" y="${fy(v)+3}">${(v/1e8).toFixed(4)}</text>`).join('');
- const xt=ser.map((s,i)=>(i%Math.ceil(n/5)==0||i==n-1)?`<text x="${fx(i)}" y="${H-3}" text-anchor="middle">${s.d.slice(5)}</text>`:'').join('');
+ const lab=s=>hr?new Date(s.d).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',hour12:false}):(TF=='all'||TF=='1m'?s.d.slice(5):s.d.slice(5));
+ const xt=ser.map((s,i)=>(i%Math.ceil(n/5)==0||i==n-1)?`<text x="${fx(i)}" y="${H-3}" text-anchor="${i==n-1?'end':i==0?'start':'middle'}">${lab(s)}</text>`:'').join('');
  const bars=ser.map((s,i)=>{const h=Math.max(1,s.vol/vm*(VH-12));return `<rect x="${fx(i)-bw/2}" y="${VH-h}" width="${bw}" height="${h}" fill="${i==n-1?'#d81e1e':'#f3ead6'}" stroke="#000"/><rect x="${fx(i)-bw/2+3}" y="${VH-h-3}" width="${bw}" height="${h}" fill="#000" opacity=".35" style="mix-blend-mode:multiply"/>`}).join('');
  const hits=ser.map((s,i)=>`<rect class="hit" data-i="${i}" x="${fx(i)-iw/n/2}" y="0" width="${iw/n}" height="${H}"/>`).join('');
  const dots=ser.map((s,i)=>`<circle cx="${fx(i)}" cy="${fy(s.floor)}" r="${i==n-1?4.5:2.5}" fill="${i==n-1?'#d81e1e':'#f26a1b'}" stroke="#000"/>`).join('');
  const ch=D.floor24hAgo?((D.floor-D.floor24hAgo)/D.floor24hAgo*100):null;
- const r=D.rsi??50,ang=Math.PI*(1-r/100),nx=60+44*Math.cos(ang),ny=56-44*Math.sin(ang);
+ const r=RS??50,ang=Math.PI*(1-r/100),nx=60+44*Math.cos(ang),ny=56-44*Math.sin(ang);
  const arc=(a0,a1,c)=>{const p=a=>[60+44*Math.cos(Math.PI*(1-a/100)),56-44*Math.sin(Math.PI*(1-a/100))];const [x0,y0]=p(a0),[x1,y1]=p(a1);return `<path d="M${x0},${y0}A44,44 0 0 1 ${x1},${y1}" stroke="${c}" stroke-width="12" fill="none"/>`;};
- M.innerHTML=`<h3><span>MARKET · 14D</span><button class="dark" id="mkMin" style="font-size:12px;padding:1px 7px">–</button></h3><div class="body">
+ M.innerHTML=`<h3><span>MARKET · ${TFS[TF][0]}</span><button class="dark" id="mkMin" style="font-size:12px;padding:1px 7px">–</button></h3><div class="body">${tfbar}
  <div class="lab">FLOOR NOW</div><div class="row"><span class="big">${btc(D.floor)}</span>${ch!=null?`<span class="ch ${ch>=0?'up':'dn'}">${ch>=0?'▲':'▼'} ${Math.abs(ch).toFixed(1)}% 24H</span>`:''}</div><small>${usd(D.floor).replace(/[()]/g,'')}</small>
  <div class="lab">FLOOR PRICE · BTC</div>
  <svg viewBox="0 0 ${W} ${H}" width="100%"><defs><filter id="gl"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
  <linearGradient id="ar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f26a1b" stop-opacity=".55"/><stop offset="1" stop-color="#f26a1b" stop-opacity="0"/></linearGradient></defs>
  ${yt}<path d="${area}" fill="url(#ar)"/><path d="${line}" transform="translate(3,3)" stroke="#000" stroke-width="3" fill="none"/><path d="${line}" stroke="#f26a1b" stroke-width="3" fill="none" filter="url(#gl)"/>${dots}${xt}${hits}</svg>
- <div class="lab">VOLUME / DAY · BTC</div><svg viewBox="0 0 ${W} ${VH+2}" width="100%"><text x="2" y="10">${(vm/1e8).toFixed(3)}</text>${bars}${hits.replace(/height="${H}"/g,'height="'+VH+'"')}</svg>
- <div class="lab">RSI 14 · MOMENTUM</div><div class="row"><svg viewBox="-6 0 132 70" width="140">${arc(0,30,'#2bd46a')}${arc(30,70,'#f3ead6')}${arc(70,100,'#d81e1e')}
+ <div class="lab">VOLUME / ${hr?'HOUR':'DAY'} · BTC</div><svg viewBox="0 0 ${W} ${VH+2}" width="100%"><text x="2" y="10">${(vm/1e8).toFixed(3)}</text>${bars}${hits.split('height="'+H+'"').join('height="'+VH+'"')}</svg>
+ <div class="lab">RSI 14 · ${hr?'HOURLY':'DAILY'} · MOMENTUM</div><div class="row"><svg viewBox="-6 0 132 70" width="140">${arc(0,30,'#2bd46a')}${arc(30,70,'#f3ead6')}${arc(70,100,'#d81e1e')}
  <line x1="60" y1="56" x2="${nx}" y2="${ny}" stroke="#000" stroke-width="5"/><line x1="60" y1="56" x2="${nx}" y2="${ny}" stroke="#f26a1b" stroke-width="3"/><circle cx="60" cy="56" r="5" fill="#f26a1b" stroke="#000"/>
  <text x="-4" y="68" style="font-size:8px">OVERSOLD</text><text x="124" y="68" text-anchor="end" style="font-size:8px">OVERBOUGHT</text></svg>
- <div><span class="big" style="font-size:28px">${D.rsi??'—'}</span><br><b style="font:16px Anton;color:${r<30?'#2bd46a':r>70?'#ff4d4d':'#f3ead6'}">${r<30?'OVERSOLD':r>70?'OVERBOUGHT':'NEUTRAL'}</b><br><small>&lt;30 oversold · &gt;70 overbought</small></div></div>
+ <div><span class="big" style="font-size:28px">${RS??'—'}</span><br><b style="font:16px Anton;color:${RS==null?'#8a7e68':r<30?'#2bd46a':r>70?'#ff4d4d':'#f3ead6'}">${RS==null?'NOT ENOUGH DATA':r<30?'OVERSOLD':r>70?'OVERBOUGHT':'NEUTRAL'}</b><br><small>&lt;30 oversold · &gt;70 overbought</small></div></div>
  <small>Floor = lowest live ask (median sale on days before tracking). Hover the chart for details.</small></div>`;
  const tip=document.getElementById('tip');
  M.querySelectorAll('.hit').forEach(h=>{h.onmousemove=e=>{const s=ser[+h.dataset.i];tip.style.display='block';tip.style.left=(e.clientX-180)+'px';tip.style.top=(e.clientY+14)+'px';
-  tip.innerHTML=`<b>${s.d}</b><br>Floor ${P(s.floor)}${s.floorSrc=='lowsale'?' <small>(median sale, pre-tracking)</small>':''}<br>Volume ${P(s.vol)} · ${s.n} sales<br>Median sale ${P(s.med)}`;};h.onmouseleave=()=>tip.style.display='none';});
+  tip.innerHTML=`<b>${hr?new Date(s.d).toLocaleString([],{hour12:false}):s.d}</b><br>Floor ${P(s.floor)}${s.floorSrc=='carry'?' <small>(last tracked ask)</small>':s.floorSrc=='lowsale'?' <small>(median sale, pre-tracking)</small>':''}<br>Volume ${P(s.vol)} · ${s.n} sales<br>Median sale ${P(s.med)}`;};h.onmouseleave=()=>tip.style.display='none';});
+ M.querySelectorAll('.tf').forEach(x=>x.onclick=()=>setTf(x.dataset.tf));
  document.getElementById('mkMin').onclick=()=>M.classList.toggle('min');}
 market();
 {const hm=new Date(D.generatedAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',hour12:false});document.getElementById('lver').textContent=VERSION+' · DATA '+hm;document.getElementById('ver').innerHTML=`<b>${VERSION}</b> · data updated ${hm}`;}
@@ -423,6 +440,6 @@ document.getElementById('enter').onclick=enter;if(sp.has('enter')||sp.get('sim')
  if(ring){ring.rotation.z=t*1.5;ring.scale.setScalar(1+.15*Math.sin(t*4));}
  ctl.update();comp?comp.render():R.render(S,cam);requestAnimationFrame(loop);})();
 const q=new URLSearchParams(location.search).get('q');if(q){document.getElementById('q').value=q;search();}
-if(sp.get('sim')){document.getElementById('sim').classList.add('show');document.getElementById('simN').value=sp.get('sim');document.getElementById('simGo').click();}
+if(sp.get('sim')){openSim(sp.get('sim'));document.getElementById('simGo').click();}
 if(sp.get('open')){const it=byNo.get(+sp.get('open'));if(it){card(it);flyTo([it.no]);}}
 </script></body></html>
