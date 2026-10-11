@@ -4,3 +4,7 @@ cache/
 site/
 *.tmp
 .DS_Store
+.env*
+vault_build/cache/
+vault_build/out/
+__pycache__/

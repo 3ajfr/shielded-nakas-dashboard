@@ -1,0 +1,45 @@
+name: Vault 3D data
+
+on:
+  # Note: GitHub only runs schedules from the default branch (main).
+  # On vault-3d use "Run workflow" (workflow_dispatch) or push to the branch.
+  schedule:
+    - cron: "15,45 * * * *"   # every 30 min = 48 API units/day
+  workflow_dispatch:
+  push:
+    branches: [vault-3d]
+    paths: ["vault_build/**", "vault/index.html", ".github/workflows/vault.yml"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: vault-data
+  cancel-in-progress: false
+
+jobs:
+  data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Build vault data (exactly 1 /listings call, never /state)
+        env:
+          ORDDROPZ_API_KEY: ${{ secrets.ORDDROPZ_API_KEY }}
+        run: |
+          test -n "$ORDDROPZ_API_KEY" || { echo "missing secret ORDDROPZ_API_KEY"; exit 1; }
+          python vault_build/build_vault_data.py
+      - name: Leak check
+        run: |
+          if grep -rq "shord_" vault/ vault_build/; then echo "API key pattern found, aborting"; exit 1; fi
+          if grep -rqF "${{ secrets.ORDDROPZ_API_KEY }}" vault/ vault_build/; then echo "key leaked, aborting"; exit 1; fi
+      - name: Commit data.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add vault/data.json
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: refresh vault data [skip ci]"
+          git push origin HEAD:${GITHUB_REF_NAME}
