@@ -33,7 +33,7 @@ const css=`
 const st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
 
 const W=360,H=540; // logical size
-let ov,cv,ctx,dpr=1,raf=0,last=0,running=false,state='ready',bird,pipes,score=0,best=+(localStorage.getItem('fnkBest')||0),t=0,img=null,imgOk=false,spawnT=0,playT=0,flaps=0,sent=false,lb=null,topList=[];
+let ov,cv,ctx,dpr=1,raf=0,last=0,running=false,state='ready',bird,pipes,score=0,best=+(localStorage.getItem('fnkBest')||0),t=0,img=null,imgOk=false,spawnT=0,playT=0,flaps=0,sent=false,busy=false,lb=null,topList=[];
 const G=1500,FLAP=-430,SPEED=150,GAP=150,PW=62,SPAWN=1.55;
 const LB='https://nakas-flappy.shielded-vault.workers.dev',APP='https://3ajfr.github.io/shielded-nakas-dashboard/vault/';
 const sfx=()=>{try{return window.VAULT&&window.VAULT.sfx}catch(e){return null}};
@@ -47,8 +47,8 @@ function drawHoodie(x,y,s){ // fallback pixel-art red hoodie (12x12 grid)
 function reset(){bird={x:96,y:H/2,v:0,r:19};pipes=[];score=0;spawnT=0;t=0;playT=0;flaps=0;sent=false;showLb(false);}
 function flap(){if(state=='ready'){state='play';reset();bird.v=FLAP;flaps=1;snd('flap');return;}
  if(state=='play'){bird.v=FLAP;flaps++;snd('flap');return;}
- if(state=='over'&&t>.6){state='ready';reset();}}
-function die(){if(state!='play')return;state='over';t=0;snd('die');if(score>best){best=score;localStorage.setItem('fnkBest',best);}showLb(true);}
+ if(state=='over'&&t>1.5&&!busy){state='ready';reset();}}
+function die(){if(state!='play')return;state='over';t=0;snd('die');if(score>best){best=score;localStorage.setItem('fnkBest',best);}showLb(true);let n='';try{n=localStorage.getItem('fnkName')||'';}catch(e){}if(n&&score>=1){const inp=lb&&lb.querySelector('input');if(inp){inp.value=n;submit();}}}
 function update(dt){t+=dt;if(state!='play'){if(state=='ready')bird.y=H/2+Math.sin(t*3)*8;return;}
  playT+=dt;bird.v+=G*dt;bird.y+=bird.v*dt;
  spawnT-=dt;if(spawnT<=0){spawnT=SPAWN;const gy=90+Math.random()*(H-180-GAP-40);pipes.push({x:W+10,gy,passed:false});}
@@ -89,12 +89,12 @@ function loadTop(){req('/top').then(r=>r.ok?r.json():Promise.reject()).then(d=>{
 function msg(m){if(lb)lb.querySelector('.fnk-msg').textContent=m;}
 function submit(){const inp=lb.querySelector('input'),name=inp.value.trim().slice(0,16),btn=lb.querySelector('.fnk-sb');
  if(!name){msg('Enter a name');inp.focus();return;}if(score<1){msg('Score at least 1 to submit');return;}if(sent)return;
- try{localStorage.setItem('fnkName',name);}catch(e){}btn.disabled=true;msg('Sending…');
+ try{localStorage.setItem('fnkName',name);}catch(e){}btn.disabled=true;busy=true;msg('Sending…');
  req('/score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,score,dur:Math.round(playT*1000),flaps})})
   .then(r=>r.json().then(d=>({ok:r.ok,d})))
-  .then(({ok,d})=>{if(ok){sent=true;if(d.top){topList=d.top;drawTop();}msg(d.improved?('Saved! Rank #'+d.rank):'Your best ('+(d.rank?'#'+d.rank:'')+') is already higher');}
-   else{btn.disabled=false;msg(d.error=='rate'?('Wait '+(d.retry||20)+'s and retry'):d.error=='implausible'?'Score rejected':'Error: '+(d.error||'try again'));}})
-  .catch(()=>{btn.disabled=false;msg('Leaderboard unreachable — try later');});}
+  .then(({ok,d})=>{busy=false;if(ok){sent=true;if(d.top){topList=d.top;drawTop();}msg(d.improved?('Saved! Rank #'+d.rank):'Your best ('+(d.rank?'#'+d.rank:'')+') is already higher');}
+   else{btn.disabled=false;msg(d.error=='rate'?('Wait '+(d.retry||20)+'s and retry'):'Not saved: '+(d.reason||d.error||'try again'));}})
+  .catch(()=>{busy=false;btn.disabled=false;msg('Leaderboard unreachable — try later');});}
 function share(){const tx='I scored '+score+' on Flappy Nakas 🎮 in The Vault by @ShieldedNakas. Can you beat me?';
  window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(tx)+'&url='+encodeURIComponent(APP),'_blank','noopener');}
 function showLb(on){if(!lb)return;lb.classList.toggle('fnk-on',!!on);if(on){msg('');lb.querySelector('.fnk-sb').disabled=score<1;lb.querySelector('.fnk-sc').textContent=score;drawTop();loadTop();}}
