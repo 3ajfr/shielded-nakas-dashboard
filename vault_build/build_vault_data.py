@@ -61,22 +61,13 @@ def main():
     trades.sort(key=lambda t: t.get("completedAt") or t.get("createdAt") or "")
     by_id = {i["inscriptionId"]: i for i in ins}
     asks = sorted(live.values()); floor = asks[0] if asks else None
-    # fair value: median of last 60 sales of same tier, adjusted by sub bucket premium vs all
-    recent = trades[-400:]
-    def med(xs): return statistics.median(xs) if xs else None
-    meta = {}
-    for t in recent:
-        i = by_id.get(t["inscriptionId"]); 
-        if not i: continue
-        meta.setdefault(("tier", i.get("rarityTier")), []).append(t["salePrice"])
-        meta.setdefault(("sub", sub_bucket(shielded_num(i))), []).append(t["salePrice"])
-    allmed = med([t["salePrice"] for t in recent]) or floor or 1
+    # fair value: hedonic model (market level x tier/sub/rank/trait premia, ridge-shrunk) — see fair_model.py
+    from fair_model import fair_values
+    fairs, _model = fair_values(ins, trades, live, floor)
     rows = []
     for i in ins:
         n = shielded_num(i); sub = sub_bucket(n); tier = i.get("rarityTier") or "Common"
-        tm = med(meta.get(("tier", tier), [])[-60:]) or allmed
-        sm = med(meta.get(("sub", sub), [])[-60:]) or allmed
-        fair = int(max(tm, sm, floor or 0) * (1.0 if tm >= sm else 1.0))
+        fair = fairs.get(i["inscriptionId"]) or floor or 0
         ask = live.get(i["inscriptionId"])
         snipe = bool(ask and (ask <= 0.75 * fair or (floor and len(asks) > 1 and ask <= 0.8 * asks[1] and ask == floor)))
         rows.append({"id": i["inscriptionId"], "no": int((i.get("name") or "#0").split("#")[-1]),
