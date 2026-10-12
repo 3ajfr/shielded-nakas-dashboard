@@ -2,8 +2,8 @@ name: Build and deploy dashboard
 
 on:
   schedule:
-    # Every 10 minutes (UTC). GitHub may delay scheduled runs when Actions is busy.
-    - cron: "*/10 * * * *"
+    # Every 15 minutes (UTC). GitHub may delay scheduled runs when Actions is busy.
+    - cron: "*/15 * * * *"
   workflow_dispatch:
   push:
     branches:
