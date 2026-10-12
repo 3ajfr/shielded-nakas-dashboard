@@ -29,11 +29,15 @@ def _get(url: str, timeout: float = DEFAULT_TIMEOUT) -> Any:
                 url,
                 headers={
                     "Accept": "application/json",
+                    "Accept-Encoding": "gzip",
                     "User-Agent": "shielded-nakas-scanner/1.0",
                 },
             )
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 raw = resp.read()
+                if resp.headers.get("Content-Encoding", "").lower() == "gzip" or raw[:2] == b"\x1f\x8b":
+                    import gzip
+                    raw = gzip.decompress(raw)
             try:
                 return json.loads(raw)
             except json.JSONDecodeError as e:
