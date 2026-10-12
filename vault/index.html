@@ -199,7 +199,7 @@ import {OrbitControls} from './OrbitControls.js';
 import {EffectComposer} from './jsm/postprocessing/EffectComposer.js';import {RenderPass} from './jsm/postprocessing/RenderPass.js';
 import {UnrealBloomPass} from './jsm/postprocessing/UnrealBloomPass.js';import {OutputPass} from './jsm/postprocessing/OutputPass.js';
 import {RoomEnvironment} from './jsm/environments/RoomEnvironment.js';
-const VERSION='v0.7'; // bump on each release
+const VERSION='v0.8'; // bump on each release
 const D = await (await fetch('data.json?'+Date.now())).json();
 const U = D.btcUsd||0, items = D.items, byNo = new Map(items.map(i=>[i.no,i]));
 const btc = s => s==null?'—':(s/1e8).toFixed(s<1e6?5:4)+' BTC';
@@ -557,4 +557,5 @@ const q=new URLSearchParams(location.search).get('q');if(q){document.getElementB
 if(sp.get('sim')){openSim(sp.get('sim'));document.getElementById('simGo').click();}
 if(sp.get('open')){const it=byNo.get(+sp.get('open'));if(it){card(it);flyTo([it.no]);}}
 </script><script src="flappy.js" defer></script>
+<script src="timeline.js" defer></script>
 </body></html>
