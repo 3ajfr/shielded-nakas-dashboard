@@ -70,9 +70,16 @@ function render(){ctx.setTransform(dpr*cv.width/(W*dpr),0,0,dpr*cv.height/(H*dpr
  if(imgOk){ctx.imageSmoothingEnabled=false;ctx.drawImage(img,-s/2,-s/2,s,s);ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.strokeRect(-s/2,-s/2,s,s);}else drawHoodie(-s/2,-s/2,s);
  ctx.restore();
  if(state=='play')txt(String(score),W/2,70,54,'#f3ead6');
- if(state=='ready'){txt('FLAPPY NAKAS',W/2,140,46,'#f26a1b');txt('THE PRIZE #1052',W/2,180,22,'#f3ead6');txt('TAP · CLICK · SPACE',W/2,H-80,20,'#f3ead6');txt('BEST '+best,W/2,215,18,'#f26a1b');if(topList[0])txt('🏆 '+topList[0].name+' '+topList[0].score,W/2,250,18,'#f3ead6');}
+ if(state=='ready'){txt('FLAPPY NAKAS',W/2,140,46,'#f26a1b');txt('THE PRIZE #1052',W/2,180,22,'#f3ead6');txt('TAP · CLICK · SPACE',W/2,H-80,20,'#f3ead6');txt('BEST '+best,W/2,215,18,'#f26a1b');startBoard();}
  if(state=='over'){ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,W,H);txt('GAME OVER',W/2,105,48,'#d81e1e');txt('SCORE '+score,W/2,160,30,'#f3ead6');txt('BEST '+best,W/2,198,24,'#f26a1b');
   if(!lb||!lb.classList.contains('fnk-on')){txt('THE PRIZE #1052',W/2,320,20,'#f3ead6');if(t>.6)txt('TAP TO RETRY',W/2,H-80,22,'#f26a1b');}}}
+function startBoard(){const x=40,y=298,w=W-80,n=Math.min(5,topList.length),h=n?50+n*17:70; // start-screen board (canvas only: never blocks taps)
+ ctx.fillStyle='#f26a1b';ctx.fillRect(x+4,y+4,w,h);ctx.fillStyle='rgba(13,11,9,.94)';ctx.fillRect(x,y,w,h);ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.strokeRect(x,y,w,h);
+ txt('🏆 TOP PILOTS',W/2,y+22,17,'#f26a1b');
+ if(!n){txt('Be the first on the board!',W/2,y+50,16,'#f3ead6');return;}
+ const cut=s=>s.length>14?s.slice(0,13)+'…':s;
+ for(let i=0;i<n;i++){const e=topList[i],yy=y+42+i*17;txt((i+1)+'. '+cut(String(e.name)),x+12,yy,14,i?'#f3ead6':'#f26a1b','left');txt(String(e.score),x+w-12,yy,14,i?'#f3ead6':'#f26a1b','right');}
+ txt('BEAT #1: '+cut(String(topList[0].name))+' '+topList[0].score,W/2,y+h-7,13,'#f26a1b');}
 // ---- global leaderboard (Cloudflare Worker; no secrets client-side; fails gracefully) ----
 function req(path,opt){const c=new AbortController(),k=setTimeout(()=>c.abort(),6000);return fetch(LB+path,{...opt,signal:c.signal}).finally(()=>clearTimeout(k));}
 function drawTop(){if(!lb)return;const ul=lb.querySelector('.fnk-top');ul.textContent='';
