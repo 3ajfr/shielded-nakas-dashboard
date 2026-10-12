@@ -199,7 +199,7 @@ import {OrbitControls} from './OrbitControls.js';
 import {EffectComposer} from './jsm/postprocessing/EffectComposer.js';import {RenderPass} from './jsm/postprocessing/RenderPass.js';
 import {UnrealBloomPass} from './jsm/postprocessing/UnrealBloomPass.js';import {OutputPass} from './jsm/postprocessing/OutputPass.js';
 import {RoomEnvironment} from './jsm/environments/RoomEnvironment.js';
-const VERSION='v0.8'; // bump on each release
+const VERSION='v0.9'; // bump on each release
 const D = await (await fetch('data.json?'+Date.now())).json();
 const U = D.btcUsd||0, items = D.items, byNo = new Map(items.map(i=>[i.no,i]));
 const btc = s => s==null?'—':(s/1e8).toFixed(s<1e6?5:4)+' BTC';
