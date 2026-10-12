@@ -8,6 +8,11 @@ on:
   push:
     branches:
       - main
+  # vault.yml commits data.json with GITHUB_TOKEN, which does not trigger push events.
+  workflow_run:
+    workflows: ["Vault 3D data"]
+    types: [completed]
+    branches: [main]
 
 permissions:
   contents: write
@@ -25,6 +30,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Set up Python
         uses: actions/setup-python@v5
