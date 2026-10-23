@@ -39,7 +39,7 @@ const LB='https://nakas-flappy.shielded-vault.workers.dev',APP='https://3ajfr.gi
 const sfx=()=>{try{return window.VAULT&&window.VAULT.sfx}catch(e){return null}};
 function snd(k){const s=sfx();if(!s)return;try{if(k=='flap')s.blip();else if(k=='score')s.clink(0);else if(k=='die')s.whoosh&&s.whoosh();}catch(e){}}
 
-function loadImg(){const u=window.VAULT&&window.VAULT.prizeImg;if(!u)return;img=new Image();img.crossOrigin='anonymous';img.onload=()=>imgOk=true;img.onerror=()=>imgOk=false;img.src=u;}
+function loadImg(){const u=window.VAULT&&window.VAULT.birdImg;if(!u)return;img=new Image();img.crossOrigin='anonymous';img.onload=()=>imgOk=true;img.onerror=()=>imgOk=false;img.src=u;}
 function drawHoodie(x,y,s){ // fallback pixel-art red hoodie (12x12 grid)
  const P=['....RRRR....','..RRRRRRRR..','.RRRSSSSRRR.','.RRSSSSSSRR.','RRSWWWWWWSRR','RRSWBBBBWSRR','RRSSSSSSSSRR','RRSSSSSSSSRR','RRRSSSSSSRRR','RRRRWRRWRRRR','RRRRWRRWRRRR','RRRRRRRRRRRR'];
  const C={R:'#d81e1e',S:'#e8c39e',W:'#f3ead6',B:'#1d4ed8'},p=s/12;
@@ -70,9 +70,9 @@ function render(){ctx.setTransform(dpr*cv.width/(W*dpr),0,0,dpr*cv.height/(H*dpr
  if(imgOk){ctx.imageSmoothingEnabled=false;ctx.drawImage(img,-s/2,-s/2,s,s);ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.strokeRect(-s/2,-s/2,s,s);}else drawHoodie(-s/2,-s/2,s);
  ctx.restore();
  if(state=='play')txt(String(score),W/2,70,54,'#f3ead6');
- if(state=='ready'){txt('FLAPPY NAKAS',W/2,140,46,'#f26a1b');txt('THE PRIZE #1052',W/2,180,22,'#f3ead6');txt('TAP · CLICK · SPACE',W/2,H-80,20,'#f3ead6');txt('BEST '+best,W/2,215,18,'#f26a1b');startBoard();}
+ if(state=='ready'){txt('FLAPPY NAKAS',W/2,140,46,'#f26a1b');txt('THE VAULT',W/2,180,22,'#f3ead6');txt('TAP · CLICK · SPACE',W/2,H-80,20,'#f3ead6');txt('BEST '+best,W/2,215,18,'#f26a1b');startBoard();}
  if(state=='over'){ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,W,H);txt('GAME OVER',W/2,105,48,'#d81e1e');txt('SCORE '+score,W/2,160,30,'#f3ead6');txt('BEST '+best,W/2,198,24,'#f26a1b');
-  if(!lb||!lb.classList.contains('fnk-on')){txt('THE PRIZE #1052',W/2,320,20,'#f3ead6');if(t>.6)txt('TAP TO RETRY',W/2,H-80,22,'#f26a1b');}}}
+  if(!lb||!lb.classList.contains('fnk-on')){txt('THE VAULT',W/2,320,20,'#f3ead6');if(t>.6)txt('TAP TO RETRY',W/2,H-80,22,'#f26a1b');}}}
 function startBoard(){const x=40,y=298,w=W-80,n=Math.min(5,topList.length),h=n?50+n*17:70; // start-screen board (canvas only: never blocks taps)
  ctx.fillStyle='#f26a1b';ctx.fillRect(x+4,y+4,w,h);ctx.fillStyle='rgba(13,11,9,.94)';ctx.fillRect(x,y,w,h);ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.strokeRect(x,y,w,h);
  txt('🏆 TOP PILOTS',W/2,y+22,17,'#f26a1b');
@@ -102,7 +102,7 @@ function loop(ts){if(!running)return;const dt=Math.min(.033,(ts-(last||ts))/1000
 function fit(){dpr=Math.min(window.devicePixelRatio||1,2.5);const r=cv.getBoundingClientRect();const w=Math.max(1,Math.round(r.width*dpr)),h=Math.max(1,Math.round(r.height*dpr));if(cv.width!=w||cv.height!=h){cv.width=w;cv.height=h;}}
 function open(){if(!ov)build();ov.classList.add('fnk-on');loadTop();if(!img)loadImg();fit();if(!bird)reset();running=true;last=0;cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);}
 function close(){if(!ov)return;ov.classList.remove('fnk-on');running=false;cancelAnimationFrame(raf);if(state=='play'){state='ready';reset();}}
-function build(){ov=document.createElement('div');ov.className='fnk-ov';ov.innerHTML='<div class="fnk-box" role="dialog" aria-label="Flappy Nakas"><div class="fnk-hd"><b>FLAPPY NAKAS</b><span>THE PRIZE #1052</span><button class="fnk-x" aria-label="Close">✕</button></div><div class="fnk-wrap"><canvas class="fnk-cv"></canvas><div class="fnk-lb"><div class="fnk-row"><input maxlength="16" placeholder="Your name" aria-label="Your name" autocomplete="nickname"><button class="fnk-sb" type="button">SUBMIT <span class="fnk-sc"></span></button><button class="fnk-sx" type="button" aria-label="Share on X">SHARE 𝕏</button></div><div class="fnk-msg"></div><div class="fnk-tt">🏆 GLOBAL TOP 10</div><ol class="fnk-top"></ol><div class="fnk-tap">TAP HERE TO RETRY</div></div></div><div class="fnk-ft">Tap / click / SPACE to flap · Esc to close</div></div>';
+function build(){ov=document.createElement('div');ov.className='fnk-ov';ov.innerHTML='<div class="fnk-box" role="dialog" aria-label="Flappy Nakas"><div class="fnk-hd"><b>FLAPPY NAKAS</b><span>THE VAULT</span><button class="fnk-x" aria-label="Close">✕</button></div><div class="fnk-wrap"><canvas class="fnk-cv"></canvas><div class="fnk-lb"><div class="fnk-row"><input maxlength="16" placeholder="Your name" aria-label="Your name" autocomplete="nickname"><button class="fnk-sb" type="button">SUBMIT <span class="fnk-sc"></span></button><button class="fnk-sx" type="button" aria-label="Share on X">SHARE 𝕏</button></div><div class="fnk-msg"></div><div class="fnk-tt">🏆 GLOBAL TOP 10</div><ol class="fnk-top"></ol><div class="fnk-tap">TAP HERE TO RETRY</div></div></div><div class="fnk-ft">Tap / click / SPACE to flap · Esc to close</div></div>';
  document.body.appendChild(ov);cv=ov.querySelector('canvas');ctx=cv.getContext('2d');
  ov.querySelector('.fnk-x').onclick=e=>{e.stopPropagation();close();};
  ov.addEventListener('click',e=>{if(e.target===ov)close();});

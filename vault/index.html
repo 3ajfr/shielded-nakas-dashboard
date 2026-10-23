@@ -25,7 +25,6 @@ button.dark{background:var(--cr)}
 #ex{top:58px;left:300px;right:360px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px}
 .exq{background:var(--cr);color:#000;font-weight:700;border:2px solid #000;padding:2px 8px;cursor:pointer;box-shadow:2px 2px 0 #000}.exq:hover{background:var(--o)}
 #sfb{font:15px Anton,sans-serif;letter-spacing:.04em;color:var(--o);margin-right:4px}#sfb.no{color:var(--red)}
-#prize{top:96px!important}
 #mkt{top:70px;right:10px;width:340px;padding:10px 12px}
 #mkt h3{margin:0;font:22px Anton,sans-serif;letter-spacing:.03em;display:flex;justify-content:space-between;align-items:center}
 #mkt .big{font:34px Anton,sans-serif;color:var(--cr);line-height:1}#mkt .ch{font:18px Anton;padding:1px 6px;margin-left:6px}#mkt .up{background:#2bd46a;color:#000}#mkt .dn{background:var(--red);color:#fff}
@@ -73,8 +72,6 @@ button.dark{background:var(--cr)}
 #list table{width:100%;border-collapse:collapse}#list td,#list th{padding:7px;border-bottom:1px solid #c9b998;text-align:left}#list th{font:16px Anton;background:#000;color:var(--o)}
 .snipe{color:var(--red);font-weight:800}small{color:#b8ab92}#cardIn small{color:#3b1a05}
 #perf{position:fixed;right:12px;bottom:12px;z-index:6;font:12px Anton;letter-spacing:.06em;color:#8a7e68}
-#prize{position:fixed;z-index:6;left:290px;top:72px;display:flex;align-items:center;gap:8px;background:var(--red);color:#fff;border:3px solid #000;padding:4px 10px 4px 4px;cursor:pointer;box-shadow:4px 4px 0 #000;font:16px Anton,sans-serif;letter-spacing:.03em;animation:wob 3s ease-in-out infinite;transform-origin:left}
-#prize img{width:44px;height:44px;image-rendering:pixelated;border:2px solid #000;background:var(--o)}
 @keyframes wob{50%{transform:rotate(-2deg) scale(1.03)}}
 /* landing poster */
 #land{position:fixed;inset:0;z-index:20;display:grid;grid-template-columns:45% 55%;grid-template-rows:1fr auto;background:var(--k);transition:transform .8s cubic-bezier(.7,0,.3,1),opacity .8s}
@@ -96,7 +93,7 @@ button.dark{background:var(--cr)}
  clip-path:polygon(0 8%,4% 0,9% 6%,15% 1%,22% 7%,30% 0,38% 6%,47% 1%,55% 7%,63% 0,71% 6%,79% 1%,87% 7%,94% 0,100% 5%,100% 100%,0 100%)}
 #land .steps i{font-style:normal;color:var(--o)}#land .steps .url{margin-left:auto;font:16px SG;font-weight:700}
 @media(max-width:0px){#land{grid-template-columns:1fr;grid-template-rows:auto 1fr auto;overflow:auto}#land .L{clip-path:none;padding:50px 20px 16px}#land .L img{width:46vw}#land .steps{grid-column:1}
- #stats{width:auto;right:10px;font-size:12px;top:116px}#prize{left:auto;right:10px;top:auto;bottom:70px}#card{left:10px;right:10px;width:auto;top:auto;bottom:10px}#sim.show{left:10px;right:10px;width:auto}}
+ #stats{width:auto;right:10px;font-size:12px;top:116px}#card{left:10px;right:10px;width:auto;top:auto;bottom:10px}#sim.show{left:10px;right:10px;width:auto}}
 
 /* ================= MOBILE (html.mob) ================= */
 #mtabs,#mbar,#mmenu,#mfbtn,#mmb,#mfh,#scrim{display:none}
@@ -116,20 +113,18 @@ html.mob #ex{top:calc(env(safe-area-inset-top) + 62px);left:0;right:0;flex-wrap:
 html.mob #ex::-webkit-scrollbar{display:none}
 html.mob .exq{white-space:nowrap;min-height:34px;display:inline-flex;align-items:center;font-size:13px;flex:0 0 auto}
 html.mob #sfb{white-space:nowrap;flex:0 0 auto}
-html.mob #mtabs{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;z-index:15;background:var(--k);border-top:3px solid var(--o);padding-bottom:env(safe-area-inset-bottom)}
-html.mob #mtabs button{border:0;border-right:2px solid #000;border-radius:0;box-shadow:none;min-height:56px;font-size:15px;background:#1b1612;color:var(--cr);transform:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;line-height:1.1}
+html.mob #mtabs{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:15;background:var(--k);border-top:3px solid var(--o);padding-bottom:env(safe-area-inset-bottom)}
+html.mob #mtabs button{border:0;border-right:2px solid #000;border-radius:0;box-shadow:none;min-height:56px;font-size:13px;background:#1b1612;color:var(--cr);transform:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;line-height:1.1}
 html.mob #mtabs button span{font-size:19px}
 html.mob #mtabs button.on{background:var(--o);color:#000}
 html.mob{--tb:calc(58px + env(safe-area-inset-bottom));--th:calc(env(safe-area-inset-top) + 104px)}
 /* hide desktop-only bits */
 html.mob #stats,html.mob #mkt,html.mob #sim,html.mob #list,html.mob #perf,html.mob #ver,html.mob #tip{display:none}
-html.mob #prize{top:calc(env(safe-area-inset-top) + 108px)!important;left:auto;right:8px;font-size:13px;padding:2px 8px 2px 2px;animation:none}
-html.mob #prize img{width:32px;height:32px}
 html.mob #res{left:8px;right:8px;width:auto;bottom:calc(var(--tb) + 8px);max-height:32vh;font-size:15px}
 html.mob .r{padding:11px 6px}
 /* tab panes (full width between top and tab bar) */
 html.mob .pane{display:block!important;position:fixed!important;left:0!important;right:0!important;top:var(--th)!important;bottom:var(--tb)!important;width:auto!important;max-height:none!important;margin:0;border-radius:0;border-left:0;border-right:0;overflow-y:auto;overflow-x:hidden;z-index:9;-webkit-overflow-scrolling:touch;animation:none;padding:12px 12px 24px}
-html.mob body:not(.t-vault) #prize,html.mob body:not(.t-vault) #res{display:none!important}
+html.mob body:not(.t-vault) #res{display:none!important}
 html.mob body:not(.t-vault) #ex{display:none}
 html.mob body:not(.t-vault){--th:calc(env(safe-area-inset-top) + 62px)}
 html.mob #mkt.pane h3{font-size:26px}html.mob #mkt.pane .big{font-size:40px}html.mob #mkt.pane svg text{font-size:11px}
@@ -175,15 +170,14 @@ html.mob #lver{top:calc(env(safe-area-inset-top) + 12px);right:12px;font-size:15
 html.mob .spark{display:none}
 </style></head><body class="landing">
 <canvas id="c"></canvas><div id="fx"></div><div id="grain"></div><div id="perf"></div><div id="ver" class="hud"></div>
-<div id="land"><div id="lver" class="stk"></div><div class="L"><span class="stk">THE PRIZE</span><img id="pImg" alt="Shielded Nakas #1052"><div class="cap">SHIELDED NAKAS #1052 · RED HOODIE</div></div>
-<div class="Rt"><div class="kick">ORD DROPZ DEVELOPER CHALLENGE · ENTRY</div><h2>THE<br><em>VAULT.</em></h2>
+<div id="land"><div id="lver" class="stk"></div><div class="L"><span class="stk">FLOOR NAKA</span><img id="pImg" alt="Shielded Nakas"><div class="cap" id="pCap">SHIELDED NAKAS</div></div>
+<div class="Rt"><div class="kick">SHIELDED NAKAS · COLLECTION TRACKER</div><h2>THE<br><em>VAULT.</em></h2>
 <div class="sub">3,327 Shielded Nakas. One 3D vault.</div>
 <div class="box">FIND SNIPES · TRACK THE FLOOR<br>SIMULATE $SHNAKAS</div><div class="live" id="lLive"></div>
 <button id="enter">ENTER THE VAULT ›</button></div>
 <div class="steps"><span>SEARCH</span><i>›</i><span>SNIPE</span><i>›</i><span>HOLD</span><i>›</i><span>SHARE</span><span class="url">built on the Shielded API · ord-dropz.xyz</span></div></div>
-<div id="prize" class="hud" title="Fly to the contest prize"><img id="bImg" alt="">THE PRIZE · #1052</div>
 <div id="top" class="hud"><h1>THE VAULT</h1>
-<form id="sf" autocomplete="off" style="display:contents"><input id="q" type="search" enterkeyhint="search" placeholder="Search: 2109 · Epic sub1k under 0.002 BTC · laser eyes"><button id="go" type="submit">Search</button></form><button id="mfbtn" class="dark" type="button" aria-label="Filters">⚙<b id="mfc">0</b></button><button id="mmb" class="dark" type="button" aria-label="More">⋯</button><button id="simple" class="dark">🏷 BEST DEALS</button><button id="simBtn">🪙 $SHNAKAS</button><button id="share">📸 Naka of the day</button><button id="music" class="dark" title="Music on/off">♪ OFF</button><button id="sfx" class="dark" title="Sound effects on/off">🔊 SFX</button><button id="reset" class="dark">⟲</button></div>
+<form id="sf" autocomplete="off" style="display:contents"><input id="q" type="search" enterkeyhint="search" placeholder="Search: 2109 · Epic sub1k under 0.002 BTC · laser eyes"><button id="go" type="submit">Search</button></form><button id="mfbtn" class="dark" type="button" aria-label="Filters">⚙<b id="mfc">0</b></button><button id="mmb" class="dark" type="button" aria-label="More">⋯</button><button id="simple" class="dark">🏷 BEST DEALS</button><button id="actBtn" class="dark">📜 ACTIVITY</button><button id="simBtn">🪙 $SHNAKAS</button><button id="share">📸 Naka of the day</button><button id="music" class="dark" title="Music on/off">♪ OFF</button><button id="sfx" class="dark" title="Sound effects on/off">🔊 SFX</button><button id="reset" class="dark">⟲</button></div>
 <div id="ex" class="hud"><span id="sfb"></span><span class="exq">2109</span><span class="exq">Epic sub1k under 0.003 BTC</span><span class="exq">legendary listed</span><span class="exq">laser eyes</span><span class="exq">sub100 deal</span></div>
 <div id="stats" class="hud panel"></div><div id="mkt" class="hud panel"></div>
 <div id="card" class="hud"><div id="cardIn" class="panel"></div></div>
@@ -192,20 +186,28 @@ html.mob .spark{display:none}
 Naka # <input id="simN" type="number" min="1" max="3327" placeholder="2109"> <button id="simGo">Simulate</button><div id="simOut"></div></div>
 <div id="list" class="panel"></div><div id="tip"></div><div id="scrim"></div>
 <div id="mmenu"></div>
-<nav id="mtabs"><button data-t="vault" class="on"><span>▦</span>VAULT</button><button data-t="deals"><span>🏷</span>DEALS</button><button data-t="market"><span>📈</span>MARKET</button><button data-t="sim"><span>🪙</span>$SHNAKAS</button></nav>
+<nav id="mtabs"><button data-t="vault" class="on"><span>▦</span>VAULT</button><button data-t="deals"><span>🏷</span>DEALS</button><button data-t="market"><span>📈</span>MARKET</button><button data-t="act"><span>📜</span>ACTIVITY</button><button data-t="sim"><span>🪙</span>$SHNAKAS</button></nav>
 <script type="module">
 import * as THREE from './three.module.min.js';
 import {OrbitControls} from './OrbitControls.js';
 import {EffectComposer} from './jsm/postprocessing/EffectComposer.js';import {RenderPass} from './jsm/postprocessing/RenderPass.js';
 import {UnrealBloomPass} from './jsm/postprocessing/UnrealBloomPass.js';import {OutputPass} from './jsm/postprocessing/OutputPass.js';
 import {RoomEnvironment} from './jsm/environments/RoomEnvironment.js';
-const VERSION='v0.9'; // bump on each release
+const VERSION='v0.10'; // bump on each release
 const D = await (await fetch('data.json?'+Date.now())).json();
+// live floor: public Shielded listings via CORS edge mirror (no API key, 0 key units); falls back to data.json
+const LIVE='https://nakas-live.shielded-vault.workers.dev';
+try{const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),4000);
+ const L=await (await fetch(LIVE+'/listings',{signal:ac.signal,cache:'no-store'})).json();clearTimeout(tm);
+ if(L&&Array.isArray(L.l)&&L.l.length){const m=new Map(L.l),asks=[...m.values()].sort((a,b)=>a-b),f=asks[0];
+  D.items.forEach(i=>{i.ask=m.get(i.id)||null;i.snipe=!!(i.ask&&(i.ask<=.75*i.fair||(asks.length>1&&i.ask<=.8*asks[1]&&i.ask==f)));});
+  D.floor=f;D.floor2=asks[1]||null;D.listed=D.items.filter(i=>i.ask).length;D.liveAt=L.at;
+  const lh=D.hourly&&D.hourly[D.hourly.length-1],ls=D.series&&D.series[D.series.length-1];if(lh)lh.floor=f;if(ls)ls.floor=f;}}catch(e){}
 const U = D.btcUsd||0, items = D.items, byNo = new Map(items.map(i=>[i.no,i]));
 const btc = s => s==null?'—':(s/1e8).toFixed(s<1e6?5:4)+' BTC';
 const usd = s => s==null||!U?'':' (~$'+Math.round(s/1e8*U).toLocaleString('en')+')';
 const P = s => btc(s)+usd(s);
-const TC = {Legendary:0xf3ead6,Epic:0xf26a1b,Rare:0xffa451,Uncommon:0x9c4a17,Common:0x4a423a,Unknown:0x333};const PRIZE=1052;
+const TC = {Legendary:0xf3ead6,Epic:0xf26a1b,Rare:0xffa451,Uncommon:0x9c4a17,Common:0x4a423a,Unknown:0x333};
 // --- scene ---
 const cv=document.getElementById('c'), R=new THREE.WebGLRenderer({canvas:cv,antialias:true});
 const MOB=document.documentElement.classList.contains('mob');R.setPixelRatio(Math.min(devicePixelRatio,MOB?1.25:2)); R.setSize(innerWidth,innerHeight);
@@ -245,10 +247,9 @@ function paint(t=0){items.forEach((it,k)=>{
   if(it.snipe){s=1+.15*Math.sin(t*6);z=.6;}
   if(anyF()&&act(it)){z=1.2;s=1.15}
   if(k==hov){z+=1.4;s*=1.25}
-  if(it.no==PRIZE&&!anyF()){z+=.4;}
   m4.makeScale(s,s,s).setPosition(p.x,p.y,z); mesh.setMatrixAt(k,m4);
-  col.setHex(it.no==PRIZE?0xff1a1a:it.snipe?0xff2020:TC[it.tier]||0x555);
-  if(it.no==PRIZE) col.multiplyScalar(1.1); else if(!it.ask) col.multiplyScalar(.22); else col.multiplyScalar(it.snipe?1.6:1.15);
+  col.setHex(it.snipe?0xff2020:TC[it.tier]||0x555);
+  if(!it.ask) col.multiplyScalar(.22); else col.multiplyScalar(it.snipe?1.6:1.15);
   if(k==hov) col.multiplyScalar(1.4);
   if(anyF()&&!act(it)) col.multiplyScalar(.08);
   mesh.setColorAt(k,col);});
@@ -384,7 +385,7 @@ const sfx={blip(){if(!AU.sfxOn)return;const C=ac();osc('square',880,C.currentTim
   wg.gain.setValueAtTime(.0001,T-.35);wg.gain.exponentialRampToValueAtTime(.09,T-.12);wg.gain.exponentialRampToValueAtTime(.0001,T+.2);w.connect(wf);wf.connect(wg);wg.connect(AU.sfx);w.start(T-.35);w.stop(T+.3);},
  clink(d=0){if(!AU.sfxOn)return;const C=ac(),t=C.currentTime+d;[2637,3520,4186].forEach((f,i)=>osc('sine',f*(1+Math.random()*.02),t+i*.012,.18,.035,AU.sfx));}};
 document.getElementById('music').onclick=()=>setMusic(!AU.on);document.getElementById('sfx').onclick=()=>setSfx(!AU.sfxOn);setSfx(AU.sfxOn);
-document.addEventListener('click',e=>{if(e.target.closest('button,.chip,.r,#prize,.tf,.exq'))sfx.blip();},true);
+document.addEventListener('click',e=>{if(e.target.closest('button,.chip,.r,.tf,.exq'))sfx.blip();},true);
 // music starts OFF until a user click; if previously ON, resume on first interaction
 if(localStorage.getItem('vaultMusic')=='1')document.addEventListener('pointerdown',()=>{if(!AU.on)setMusic(true)},{once:true});
 // --- filter chips ---
@@ -452,13 +453,8 @@ document.getElementById('share').onclick=async()=>{const it=byNo.get(D.nakaOfDay
  open('https://x.com/intent/post?text='+encodeURIComponent(`🛡️ Naka of the day: Shielded NAKAS #${it.no} (${it.tier}, rank ${it.rank}) listed at ${btc(it.ask)}${usd(it.ask)} vs est. fair ${btc(it.fair)}\nExplore The Vault 👉 ${location.href}\n@ShieldedNaka`),'_blank');});};
 // --- loop ---
 addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();R.setSize(innerWidth,innerHeight);comp&&comp.setSize(innerWidth,innerHeight);});
-const pk=items.findIndex(i=>i.no==PRIZE);let ring=null;
-if(pk>=0){ring=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.12,1.12,.62)),new THREE.LineBasicMaterial({color:0xd81e1e}));ring.position.set(pos[pk].x,pos[pk].y,1.0);S.add(ring);
- {const cv2=document.createElement('canvas');cv2.width=128;cv2.height=40;const x=cv2.getContext('2d');x.fillStyle='#d81e1e';x.fillRect(0,0,128,40);x.strokeStyle='#000';x.lineWidth=4;x.strokeRect(2,2,124,36);
-  x.fillStyle='#fff';x.font='26px Anton, Impact, sans-serif';x.textAlign='center';x.fillText('PRIZE',64,30);
-  const sp_=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv2),toneMapped:false}));sp_.scale.set(1.5,.47,1);sp_.position.set(0,.85,.2);ring.add(sp_);}
- const pu=img(items[pk]);document.getElementById('pImg').src=pu;document.getElementById('bImg').src=pu;}
-document.getElementById('prize').onclick=()=>{const it=byNo.get(PRIZE);if(it){card(it);flyTo([PRIZE]);}};
+{const fl=items.filter(i=>i.ask).sort((a,b)=>a.ask-b.ask)[0]||byNo.get(D.nakaOfDay)||items[0]; // landing poster: current floor Naka
+ if(fl){document.getElementById('pImg').src=img(fl);document.getElementById('pCap').textContent=`SHIELDED NAKAS #${fl.no}`+(fl.ask?` · FLOOR ${btc(fl.ask)}`:'');}}
 document.getElementById('lLive').innerHTML=`LIVE · Floor <b>${P(D.floor)}</b> · ${D.listed} listed · 24h vol <b>${P(D.vol24)}</b>`;
 chips();
 // --- market panel (2.5D poster chart) ---
@@ -503,23 +499,25 @@ function market(){const M=document.getElementById('mkt'),hr=TF=='24h',src=hr?(D.
  M.querySelectorAll('.tf').forEach(x=>x.onclick=()=>setTf(x.dataset.tf));
  document.getElementById('mkMin').onclick=()=>M.classList.toggle('min');}
 market();
-window.VAULT={sfx,prizeImg:byNo.get(1052)?img(byNo.get(1052)):null}; // used by flappy.js
-{const hm=new Date(D.generatedAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',hour12:false});document.getElementById('lver').textContent=VERSION+' · DATA '+hm;document.getElementById('ver').innerHTML=`<b>${VERSION}</b> · data updated ${hm}`;}
+window.VAULT={sfx,birdImg:byNo.get(1052)?img(byNo.get(1052)):null, // used by flappy.js (bird sprite)
+ items,byNo,P,img,btc,D,LIVE,card:it=>card(it),flyTo:n=>flyTo(n)}; // used by activity.js
+{const hm=new Date(D.generatedAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',hour12:false});const lv=D.liveAt?new Date(D.liveAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',hour12:false}):null;document.getElementById('lver').textContent=VERSION+(lv?' · LIVE '+lv:' · DATA '+hm);document.getElementById('ver').innerHTML=`<b>${VERSION}</b> · data updated ${hm}${lv?` · floor live ${lv}`:''}`;}
 
 // ================= MOBILE UI =================
 function setTab(t){if(!document.documentElement.classList.contains('mob'))return;
- document.body.classList.remove('t-vault','t-deals','t-market','t-sim');document.body.classList.add('t-'+t);
+ document.body.classList.remove('t-vault','t-deals','t-market','t-sim','t-act');document.body.classList.add('t-'+t);
  document.querySelectorAll('#mtabs button').forEach(b=>b.classList.toggle('on',b.dataset.t==t));
  ['list','mkt','sim'].forEach(id=>document.getElementById(id).classList.remove('pane'));
  document.getElementById('list').style.display='none';simple=false;
  if(t=='deals'){simple=true;const L=document.getElementById('list');L.classList.add('pane');L.style.display='block';renderList();L.scrollTop=0;}
  if(t=='market'){document.getElementById('mkt').classList.remove('min');document.getElementById('mkt').classList.add('pane');market();}
  if(t=='sim'){document.getElementById('sim').classList.add('pane');openSim();}
+ if(window.VaultActivity){if(t=='act')VaultActivity.open(true);else VaultActivity.close();}
  closeSheet();document.getElementById('mmenu').classList.remove('on');}
 function closeSheet(){document.getElementById('stats').classList.remove('sheet');document.getElementById('scrim').classList.remove('on');}
 if(MOB){document.body.classList.add('t-vault');
  document.querySelectorAll('#mtabs button').forEach(b=>b.onclick=()=>setTab(b.dataset.t));
- const mm=document.getElementById('mmenu');['simple','simBtn','share','music','sfx','reset'].forEach(id=>{const b=document.getElementById(id);if(id=='simple'||id=='simBtn')return;mm.appendChild(b);});
+ const mm=document.getElementById('mmenu');['simple','simBtn','actBtn','share','music','sfx','reset'].forEach(id=>{const b=document.getElementById(id);if(id=='simple'||id=='simBtn'||id=='actBtn')return;mm.appendChild(b);});
  document.getElementById('reset').textContent='⟲ Reset view & filters';
  document.getElementById('mmb').onclick=e=>{e.stopPropagation();mm.classList.toggle('on');};
  document.addEventListener('click',e=>{if(!e.target.closest('#mmenu,#mmb'))mm.classList.remove('on');});
@@ -551,11 +549,11 @@ document.getElementById('enter').onclick=enter;if(sp.has('enter')||sp.get('sim')
 
  for(let i=coins.length-1;i>=0;i--){const c=coins[i];c.userData.v=Math.min(.04,c.userData.v+.004);c.position.y=Math.max(c.userData.y0+.2,c.position.y-c.userData.v);if(performance.now()-c.userData.born>1400){S.remove(c);coins.splice(i,1);}}
  grid.position.z=(t*6)%4;stars.rotation.z=t*.004;sun.material.opacity=.15+.05*Math.sin(t);if(bloom)bloom.strength=anyF()?0:.25;
- if(ring){ring.visible=!anyF()||act(byNo.get(PRIZE));ring.position.z=1.0+(anyF()&&act(byNo.get(PRIZE))?.2:0);}
  ctl.update();comp?comp.render():R.render(S,cam);requestAnimationFrame(loop);})();
 const q=new URLSearchParams(location.search).get('q');if(q){document.getElementById('q').value=q;search();}
 if(sp.get('sim')){openSim(sp.get('sim'));document.getElementById('simGo').click();}
 if(sp.get('open')){const it=byNo.get(+sp.get('open'));if(it){card(it);flyTo([it.no]);}}
 </script><script src="flappy.js" defer></script>
 <script src="timeline.js" defer></script>
+<script src="activity.js" defer></script>
 </body></html>
