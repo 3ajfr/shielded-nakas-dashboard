@@ -157,10 +157,13 @@ def fetch_listings(refresh: bool = True) -> list[dict]:
     payload = _get(f"{BASE_SHIELDED}/listings")
     if isinstance(payload, list):
         listings = payload
-    elif isinstance(payload, dict):
-        listings = payload.get("data") or payload.get("listings") or []
+    elif isinstance(payload, dict) and isinstance(payload.get("data") or payload.get("listings"), list):
+        listings = payload.get("data") or payload.get("listings")
     else:
-        listings = []
+        raise RuntimeError(f"Unexpected listings payload: {str(payload)[:200]}")
+    if not listings:
+        # Fail loudly: never publish an empty/stale market as if it were live.
+        raise RuntimeError("Live listings endpoint returned 0 rows")
     save_cache("listings", listings)
     return listings
 

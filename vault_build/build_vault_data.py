@@ -39,9 +39,20 @@ def spend(units: int):
 def official_listings():
     # exactly ONE /listings call (1 unit) per run; /state (20 units) is never used
     spend(1)
-    req = urllib.request.Request(BASE + "/listings", headers={"x-api-key": key(), "User-Agent": "nakas-vault"})
+    req = urllib.request.Request(BASE + "/listings", headers={"x-api-key": key(), "User-Agent": "nakas-vault",
+                                                             "Accept": "application/json", "Accept-Encoding": "gzip"})
     with urllib.request.urlopen(req, timeout=30) as r:
-        return json.load(r)
+        raw = r.read()
+        if (r.headers.get("Content-Encoding") or "").lower() == "gzip" or raw[:2] == b"\x1f\x8b":
+            import gzip
+            raw = gzip.decompress(raw)
+    data = json.loads(raw)
+    if isinstance(data, dict):
+        data = data.get("data") or data.get("listings")
+    if not isinstance(data, list) or not data:
+        # Fail loudly: keep the previous data.json instead of publishing an empty market.
+        raise SystemExit("Official /listings returned no rows: data.json NOT overwritten")
+    return data
 
 def rsi(vals, n=14):
     if len(vals) <= n: return None
@@ -57,6 +68,8 @@ def main():
     lst = official_listings()
     live = {l["inscriptionId"]: int(l["price"]) for l in lst
             if not l.get("pending") and not l.get("cancelling") and int(l.get("price") or 0) >= 1000}
+    if not live:
+        raise SystemExit("No usable live listings: data.json NOT overwritten")
     trades = [t for t in fetch_trades(refresh=True) if t.get("status") == "completed" and t.get("salePrice")]
     trades.sort(key=lambda t: t.get("completedAt") or t.get("createdAt") or "")
     by_id = {i["inscriptionId"]: i for i in ins}

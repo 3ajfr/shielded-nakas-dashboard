@@ -114,6 +114,10 @@ def js_json(data: dict) -> str:
     )
 
 
+def floors_ok(live: list[dict]) -> bool:
+    return any(isinstance(x.get("ask"), int) and x["ask"] > 0 for x in live)
+
+
 def main() -> int:
     now = datetime.now(timezone.utc)
     usd = btc_usd()
@@ -141,6 +145,8 @@ def main() -> int:
             "rank": rf.get("rarityRank"),
             "num": n,
         })
+    if not live or not floors_ok(live):
+        raise SystemExit("No usable live listings: refusing to write floor history / deploy stale data")
     floors = slice_floors(live)
     listed_all = sum(1 for x in live if match_slice(x["tier"], x["sub"], x["rank"], "all", "all", "all"))
 
